@@ -17,7 +17,9 @@ const CATEGORIES = {
 
 // ---------- 2. Les données ----------
 // Une tâche ressemble à ça :
-// { id, titre, date: "2026-11-21", heure: "14:00", cat: "cours", note, fait: false, creeLe }
+// { id, titre, date: "2026-11-21", heure: "14:00", cat: "cours", note, fait: false, creeLe,
+//   repete: "" | "jour" | "ouvres" | "jours" | "semaine" | "deux-semaines" | "mois",
+//   jours: [1, 3, 5] }   ← pour "jours" : 0 = dimanche, 1 = lundi … 6 = samedi
 const CLE = "quotidien.taches.v1";
 let taches = charger();
 
@@ -64,6 +66,61 @@ function jolieDate(txt) {
   return `${JOURS_LONGS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`;
 }
 
+// ---------- 3 bis. Les tâches répétées ----------
+// Comme dans l'app Rappels : une tâche répétée n'existe qu'une fois.
+// Quand tu la coches, on garde une trace "faite" et la tâche
+// saute à sa prochaine date.
+const REPETITIONS = {
+  "jour": "Tous les jours",
+  "ouvres": "En semaine",
+  "jours": "Certains jours",
+  "semaine": "Chaque semaine",
+  "deux-semaines": "Toutes les 2 sem.",
+  "mois": "Chaque mois",
+};
+const LETTRES = ["D", "L", "M", "M", "J", "V", "S"]; // index = jour de la semaine
+
+function libelleRepete(t) {
+  if (t.repete === "jours" && t.jours?.length) {
+    // Affiché dans l'ordre lundi → dimanche
+    return [1, 2, 3, 4, 5, 6, 0].filter((j) => t.jours.includes(j)).map((j) => JOURS[j]).join(" ");
+  }
+  return REPETITIONS[t.repete] || "";
+}
+
+// Date de la prochaine occurrence après `txt`
+function suivante(txt, t) {
+  const d = versDate(txt);
+  switch (t.repete) {
+    case "jour": d.setDate(d.getDate() + 1); break;
+    case "semaine": d.setDate(d.getDate() + 7); break;
+    case "deux-semaines": d.setDate(d.getDate() + 14); break;
+    case "mois": {
+      const jour = versDate(t.dateDebut || txt).getDate();      // on garde le jour d'origine (ex. le 31)
+      d.setDate(1); d.setMonth(d.getMonth() + 1);
+      const dernier = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      d.setDate(Math.min(jour, dernier));
+      break;
+    }
+    case "ouvres":
+    case "jours": {
+      const permis = t.repete === "ouvres" ? [1, 2, 3, 4, 5] : (t.jours?.length ? t.jours : [d.getDay()]);
+      do { d.setDate(d.getDate() + 1); } while (!permis.includes(d.getDay()));
+      break;
+    }
+    default: return null;
+  }
+  return enTexte(d);
+}
+
+// Pour l'agenda : la tâche répétée tombe-t-elle aussi ce jour-là ?
+function tombeLe(t, jour) {
+  if (!t.repete || !t.date || t.fait || jour <= t.date) return false;
+  let d = t.date;
+  for (let i = 0; i < 800 && d < jour; i++) d = suivante(d, t);
+  return d === jour;
+}
+
 // Ordre de tri : d'abord les tâches datées (par jour puis heure), puis sans date.
 function trier(a, b) {
   const da = a.date || "9999", db = b.date || "9999";
@@ -89,9 +146,11 @@ document.querySelectorAll(".onglets button").forEach((bouton) => {
 // ---------- 5. Fabriquer une ligne de tâche ----------
 // On construit les éléments un par un (plutôt que du HTML en texte)
 // pour qu'un titre ne puisse jamais "casser" la page.
-function ligneTache(t, { montrerDate = true } = {}) {
+function ligneTache(t, { montrerDate = true, projection = false } = {}) {
   const li = document.createElement("li");
   if (t.fait) li.classList.add("fait");
+  // "projection" = une future occurrence d'une tâche répétée, montrée dans l'agenda
+  if (projection) li.classList.add("projection");
 
   const caseBtn = document.createElement("button");
   caseBtn.className = "case" + (t.fait ? " cochee" : "");
@@ -113,8 +172,9 @@ function ligneTache(t, { montrerDate = true } = {}) {
   if (montrerDate && t.date) morceaux.push(jolieDate(t.date));
   if (t.heure) morceaux.push(t.heure.replace(":", "h"));
   morceaux.push(CATEGORIES[t.cat]?.nom || "");
+  if (t.repete) morceaux.push("↻ " + libelleRepete(t));
   meta.textContent = morceaux.filter(Boolean).join(" · ");
-  if (!t.fait && t.date && t.date < aujourdhui()) {
+  if (!t.fait && !projection && t.date && t.date < aujourdhui()) {
     meta.classList.add("retard");
     meta.textContent = "En retard · " + meta.textContent;
   }
@@ -285,7 +345,7 @@ function afficherAgenda() {
     num.textContent = d.getDate();
     const points = document.createElement("span");
     points.className = "points";
-    const nb = taches.filter((t) => t.date === jour && !t.fait).length;
+    const nb = taches.filter((t) => (t.date === jour && !t.fait) || tombeLe(t, jour)).length;
     for (let k = 0; k < Math.min(nb, 3); k++) points.append(document.createElement("i"));
 
     b.append(nom, num, points);
@@ -294,9 +354,11 @@ function afficherAgenda() {
   }
 
   document.getElementById("titre-jour").textContent = jolieDate(jourChoisi);
-  const duJour = taches.filter((t) => t.date === jourChoisi).sort(trier);
+  const vraies = taches.filter((t) => t.date === jourChoisi);
+  const futures = taches.filter((t) => tombeLe(t, jourChoisi));
+  const duJour = [...vraies, ...futures].sort((a, b) => (a.heure || "99") < (b.heure || "99") ? -1 : 1);
   const ul = document.getElementById("liste-jour");
-  remplir(ul, duJour, { montrerDate: false });
+  ul.replaceChildren(...duJour.map((t) => ligneTache(t, { montrerDate: false, projection: futures.includes(t) })));
   if (!duJour.length) {
     const li = document.createElement("li");
     li.className = "vide-msg";
@@ -317,6 +379,31 @@ document.getElementById("choix-cat").replaceChildren(
   ...Object.entries(CATEGORIES).map(([cle, c]) => new Option(c.nom, cle))
 );
 
+const nouvelId = () => crypto.randomUUID?.() || String(Date.now() + Math.random());
+
+// Les 7 boutons L M M J V S D (lundi en premier)
+let joursChoisis = [];
+const zoneJours = document.getElementById("jours-semaine");
+
+function dessinerJours() {
+  zoneJours.hidden = formulaire.repete.value !== "jours";
+  zoneJours.replaceChildren(
+    ...[1, 2, 3, 4, 5, 6, 0].map((j) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = LETTRES[j];
+      b.setAttribute("aria-label", JOURS_LONGS[j]);
+      b.classList.toggle("on", joursChoisis.includes(j));
+      b.addEventListener("click", () => {
+        joursChoisis = joursChoisis.includes(j) ? joursChoisis.filter((x) => x !== j) : [...joursChoisis, j];
+        dessinerJours();
+      });
+      return b;
+    })
+  );
+}
+formulaire.repete.addEventListener("change", dessinerJours);
+
 function ouvrirFenetre(tache = null) {
   enEdition = tache;
   document.getElementById("titre-fenetre").textContent = tache ? "Modifier" : "Nouvelle tâche";
@@ -327,6 +414,9 @@ function ouvrirFenetre(tache = null) {
   formulaire.heure.value = tache?.heure || "";
   formulaire.cat.value = tache?.cat || "perso";
   formulaire.note.value = tache?.note || "";
+  formulaire.repete.value = tache?.repete || "";
+  joursChoisis = tache?.jours ? [...tache.jours] : [];
+  dessinerJours();
   fenetre.showModal();
   if (!tache) formulaire.titre.focus();
 }
@@ -341,12 +431,24 @@ formulaire.addEventListener("submit", () => {
     heure: formulaire.heure.value,
     cat: formulaire.cat.value,
     note: formulaire.note.value.trim(),
+    repete: formulaire.repete.value,
+    jours: formulaire.repete.value === "jours" ? [...joursChoisis] : [],
   };
   if (!valeurs.titre) return;
+  if (valeurs.repete) {
+    // Une tâche répétée a toujours une date de départ
+    if (!valeurs.date) valeurs.date = aujourdhui();
+    // "Certains jours" sans jour coché → le jour de la date choisie
+    if (valeurs.repete === "jours" && !valeurs.jours.length) valeurs.jours = [versDate(valeurs.date).getDay()];
+    // Si la date de départ ne tombe pas un jour choisi, on avance au premier bon jour
+    const permis = valeurs.repete === "ouvres" ? [1, 2, 3, 4, 5] : valeurs.repete === "jours" ? valeurs.jours : null;
+    if (permis && !permis.includes(versDate(valeurs.date).getDay())) valeurs.date = suivante(valeurs.date, valeurs);
+    valeurs.dateDebut = valeurs.date;
+  }
   if (enEdition) {
     Object.assign(enEdition, valeurs);
   } else {
-    taches.push({ id: crypto.randomUUID?.() || String(Date.now()), fait: false, creeLe: Date.now(), ...valeurs });
+    taches.push({ id: nouvelId(), fait: false, creeLe: Date.now(), ...valeurs });
   }
   enregistrer();
   afficher();
@@ -363,6 +465,20 @@ document.getElementById("btn-supprimer").addEventListener("click", () => {
 function basculer(id) {
   const t = taches.find((x) => x.id === id);
   if (!t) return;
+
+  if (t.repete && !t.fait) {
+    // 1. On garde une trace de ce qui a été fait (dans "Faites")
+    taches.push({ ...t, id: nouvelId(), repete: "", jours: [], fait: true, creeLe: Date.now() });
+    // 2. La tâche saute à sa prochaine date (jamais avant aujourd'hui)
+    let prochaine = suivante(t.date || aujourdhui(), t);
+    while (prochaine < aujourdhui()) prochaine = suivante(prochaine, t);
+    t.date = prochaine;
+    tachesPassees = tachesPassees.filter((x) => x !== t.id);
+    enregistrer();
+    afficher();
+    return;
+  }
+
   t.fait = !t.fait;
   enregistrer();
   afficher();
