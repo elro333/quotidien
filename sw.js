@@ -2,8 +2,8 @@
 // pour qu'elle s'ouvre sans réseau.
 // À chaque nouvelle version de l'appli, on change le numéro ci-dessous
 // pour que l'iPhone télécharge les nouveaux fichiers.
-const VERSION = "quotidien-v6";
-const FICHIERS = ["./", "index.html", "style.css", "app.js", "manifest.json", "icons/icon-180.png", "icons/icon-512.png"];
+const VERSION = "quotidien-v7";
+const FICHIERS = ["./", "index.html", "style.css", "app.js", "budget.js", "manifest.json", "icons/icon-180.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)));

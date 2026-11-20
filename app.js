@@ -131,21 +131,33 @@ function trier(a, b) {
 }
 
 // ---------- 4. Navigation entre onglets ----------
-const TITRES = { aujourdhui: "Aujourd'hui", taches: "Tâches", agenda: "Agenda" };
+// Les écrans : "aujourdhui", "taches" (Agenda en liste), "agenda" (Agenda en semaine), "budget".
+// L'onglet Agenda de la barre regroupe "taches" et "agenda" (interrupteur Liste / Semaine).
+const TITRES = { aujourdhui: "Aujourd'hui", taches: "Agenda", agenda: "Agenda", budget: "Budget" };
 let vueActive = "aujourdhui";
+let sousAgenda = "taches"; // la dernière vue choisie dans l'onglet Agenda
 
 const barreOnglets = document.querySelector(".onglets");
 const boutonsOnglets = [...barreOnglets.querySelectorAll("button")];
 const pilule = document.getElementById("pilule");
+const ongletDe = (vue) => (vue === "taches" ? "agenda" : vue); // écran → bouton de la barre
 
 function allerA(vue) {
+  if (vue === "agenda" && vueActive !== "taches" && vueActive !== "agenda") vue = sousAgenda;
   if (vue === vueActive) { placerPilule(); return; }
   vueActive = vue;
-  boutonsOnglets.forEach((b) => b.classList.toggle("active", b.dataset.vue === vue));
+  if (vue === "taches" || vue === "agenda") sousAgenda = vue;
+  boutonsOnglets.forEach((b) => b.classList.toggle("active", b.dataset.vue === ongletDe(vue)));
   document.querySelectorAll(".vue").forEach((v) => v.classList.toggle("active", v.id === "vue-" + vue));
+  document.querySelectorAll("#segment-agenda button").forEach((b) => b.classList.toggle("active", b.dataset.sous === vue));
+  document.getElementById("segment-agenda").hidden = ongletDe(vue) !== "agenda";
   window.scrollTo(0, 0);
   afficher();
 }
+
+document.querySelectorAll("#segment-agenda button").forEach((b) =>
+  b.addEventListener("click", () => allerA(b.dataset.sous))
+);
 
 // Glisser le doigt sur la barre, comme sur iOS 26 :
 // la pilule suit le doigt, grossit un peu, et se pose sur
@@ -475,7 +487,10 @@ function ouvrirFenetre(tache = null) {
   if (!tache) formulaire.titre.focus();
 }
 
-document.getElementById("btn-ajouter").addEventListener("click", () => ouvrirFenetre());
+// Le bouton + ajoute une tâche… ou un mouvement d'argent sur l'onglet Budget
+document.getElementById("btn-ajouter").addEventListener("click", () =>
+  vueActive === "budget" ? ouvrirMouvement() : ouvrirFenetre()
+);
 document.getElementById("btn-annuler").addEventListener("click", () => fenetre.close());
 
 formulaire.addEventListener("submit", () => {
@@ -544,14 +559,22 @@ function afficher() {
   document.getElementById("titre-petit").textContent = TITRES[vueActive];
   const sous = document.getElementById("sous-titre");
   const restantes = taches.filter((t) => !t.fait && t.date && t.date <= aujourdhui()).length;
-  sous.textContent = vueActive === "aujourdhui"
-    ? jolieDate(aujourdhui()) + (restantes ? ` · ${restantes} à faire` : "")
-    : vueActive === "taches" ? `${taches.filter((t) => !t.fait).length} à faire` : "Semaine";
+  sous.textContent = {
+    aujourdhui: jolieDate(aujourdhui()) + (restantes ? ` · ${restantes} à faire` : ""),
+    taches: `${taches.filter((t) => !t.fait).length} à faire`,
+    agenda: "Semaine",
+    budget: "Ce mois-ci",
+  }[vueActive];
   placerPilule();
 
   if (vueActive === "aujourdhui") afficherAujourdhui();
   if (vueActive === "taches") afficherTaches();
   if (vueActive === "agenda") afficherAgenda();
+  // budget.js est chargé après ce fichier : on vérifie qu'il est là
+  if (typeof afficherBudget === "function") {
+    if (vueActive === "budget") afficherBudget();
+    if (vueActive === "aujourdhui") afficherMiniBudget();
+  }
 }
 
 // La pilule de verre glisse sous l'onglet choisi

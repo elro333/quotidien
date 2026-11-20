@@ -1,6 +1,6 @@
 {
-  "name": "Mon quotidien",
-  "short_name": "Quotidien",
+  "name": "TODOS",
+  "short_name": "TODOS",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

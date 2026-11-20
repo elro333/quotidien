@@ -351,7 +351,7 @@ dialog form { padding: 8px 16px calc(var(--bas) + 24px); display: flex; flex-dir
 
 /* Choix des jours (L M M J V S D) pour une tâche répétée */
 .jours-semaine { justify-content: space-between; padding: 10px 16px 12px; }
-.jours-semaine[hidden] { display: none; }
+.jours-semaine[hidden], .ligne[hidden] { display: none; }
 .jours-semaine button {
   width: 38px; height: 38px; border-radius: 50%; border: none; padding: 0;
   background: rgba(120,120,128,.14); color: var(--texte); font: inherit; font-size: 15px; font-weight: 600;
@@ -362,3 +362,112 @@ dialog form { padding: 8px 16px calc(var(--bas) + 24px); display: flex; flex-dir
 .btn-supprimer {
   border: none; color: var(--rouge); font: inherit; font-size: 17px; padding: 14px; width: 100%; cursor: pointer;
 }
+
+/* ============================================================
+   Interrupteur segmenté (Liste / Semaine, Dépense / Revenu)
+   ============================================================ */
+.segment {
+  display: flex; padding: 3px; border-radius: 12px; margin: 4px 0 10px;
+  background: rgba(120,120,128,.14); position: relative;
+}
+.segment[hidden] { display: none; }
+.segment button {
+  flex: 1; border: none; background: none; color: var(--texte); font: inherit; font-size: 14px; font-weight: 600;
+  padding: 7px 0; border-radius: 9px; transition: background .2s, box-shadow .2s;
+}
+.segment button.active { background: var(--carte-segment, #fff); box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); }
+@media (prefers-color-scheme: dark) { .segment button.active { background: #636366; } }
+.segment-plein { margin: 0; }
+
+/* ============================================================
+   Onglet Budget
+   ============================================================ */
+.nav-mois { margin: 0 0 10px; }
+.nav-mois strong { text-transform: capitalize; }
+
+.carte-reste .gros-montant { font-size: 40px; font-weight: 700; letter-spacing: -.5px; margin: 6px 0 14px; font-variant-numeric: tabular-nums; }
+.positif { color: var(--vert); }
+.negatif { color: var(--rouge); }
+.petit { font-size: 13px; color: var(--texte-2); }
+.carte-reste .muted { margin-top: 12px; }
+
+.barre { height: 8px; border-radius: 99px; background: rgba(120,120,128,.18); overflow: hidden; }
+.barre span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.barre span.attention { background: var(--orange); }
+.barre span.alerte { background: var(--rouge); }
+.barre.fine { height: 6px; margin: 6px 0 4px; }
+
+.deux-totaux { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.deux-totaux div { display: flex; flex-direction: column; gap: 2px; }
+.deux-totaux strong { font-size: 18px; font-variant-numeric: tabular-nums; }
+
+.bloc { border-radius: 22px; padding: 6px 16px; }
+.ligne-cat { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.ligne-cat + .ligne-cat { border-top: .5px solid var(--separateur); }
+.infos-cat { flex: 1; min-width: 0; }
+.haut-cat { display: flex; justify-content: space-between; gap: 10px; font-size: 16px; }
+.haut-cat strong { font-variant-numeric: tabular-nums; }
+
+/* Icône de catégorie : carré arrondi coloré, comme dans Réglages */
+.ico-cat {
+  width: 34px; height: 34px; border-radius: 10px; flex: none;
+  display: grid; place-items: center; font-size: 17px; color: #fff; font-weight: 700;
+}
+
+.titre-avec-bouton { display: flex; align-items: baseline; justify-content: space-between; }
+.titre-avec-bouton .btn-texte { font-size: 16px; padding-right: 4px; }
+.aide { color: var(--texte-2); font-size: 14px; margin: 0 4px; }
+
+.carte-dette {
+  display: block; width: 100%; text-align: left; border-radius: 20px; padding: 14px 16px; margin-bottom: 10px;
+  color: var(--texte); font: inherit; cursor: pointer;
+}
+
+.jour-mvt { font-size: 14px; font-weight: 600; color: var(--texte-2); margin: 18px 6px 8px; text-transform: capitalize; }
+.ligne-mvt { cursor: pointer; }
+.liste li.ligne-mvt + li::before { left: 62px; }
+.montant-ligne { font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 16px; }
+
+/* Rappel du budget sur Aujourd'hui */
+.mini-budget {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; margin-top: 22px;
+  border-radius: 20px; padding: 14px 16px; color: var(--texte); font: inherit; cursor: pointer;
+}
+.mini-budget[hidden] { display: none; }
+.mini-budget strong { font-size: 18px; }
+
+/* Feuille dépense : gros montant au centre */
+.montant { display: flex; align-items: baseline; justify-content: center; gap: 6px; color: var(--texte); }
+.montant input {
+  font: inherit; font-size: 48px; font-weight: 700; text-align: center; letter-spacing: -1px;
+  border: none; background: none; color: var(--texte); outline: none; width: 58%;
+  font-variant-numeric: tabular-nums; text-align: right;  /* le chiffre colle au symbole € */
+}
+.montant span { width: 42%; }
+.montant input::placeholder { color: var(--texte-2); opacity: .5; }
+.montant span { font-size: 32px; font-weight: 600; color: var(--texte-2); }
+#fenetre-dette .montant input { font-size: 32px; }
+
+/* Grille des catégories */
+.grille-cat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 4px; }
+.puce-cat {
+  border: none; background: none; color: var(--texte); font: inherit; font-size: 11px; font-weight: 500;
+  display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 6px 2px; border-radius: 14px;
+  line-height: 1.15; text-align: center;
+}
+.puce-cat .ico-cat { width: 46px; height: 46px; border-radius: 50%; font-size: 21px; transition: transform .2s, box-shadow .2s; }
+.puce-cat.choisie .ico-cat { box-shadow: 0 0 0 2.5px var(--fond), 0 0 0 5px var(--c); transform: scale(1.04); }
+.puce-cat.choisie { font-weight: 700; }
+
+/* Interrupteur iOS (vert) */
+.interrupteur {
+  -webkit-appearance: none; appearance: none; flex: none; cursor: pointer;
+  width: 51px !important; max-width: none !important; height: 31px; border-radius: 99px; padding: 0 !important;
+  background: rgba(120,120,128,.3) !important; position: relative; transition: background .25s;
+}
+.interrupteur::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%;
+  background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.16); transition: transform .25s cubic-bezier(.3,1.3,.5,1);
+}
+.interrupteur:checked { background: var(--vert) !important; }
+.interrupteur:checked::after { transform: translateX(20px); }

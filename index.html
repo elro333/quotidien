@@ -9,7 +9,7 @@
   <meta charset="utf-8">
   <!-- viewport-fit=cover : l'appli occupe tout l'écran de l'iPhone, encoche comprise -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <title>Mon quotidien</title>
+  <title>TODOS</title>
 
   <!-- Ces lignes rendent l'appli "installable" sur l'iPhone -->
   <link rel="manifest" href="manifest.json">
@@ -17,7 +17,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Quotidien">
+  <meta name="apple-mobile-web-app-title" content="TODOS">
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 
@@ -39,14 +39,22 @@
       <h1 id="titre">Aujourd'hui</h1>
     </div>
 
+    <!-- Interrupteur Liste / Semaine (onglet Agenda seulement) -->
+    <div class="segment" id="segment-agenda" hidden>
+      <button data-sous="taches" class="active">Liste</button>
+      <button data-sous="agenda">Semaine</button>
+    </div>
+
     <!-- ===== Onglet 1 : AUJOURD'HUI ===== -->
     <section id="vue-aujourdhui" class="vue active">
       <div id="carte-focus" class="verre focus"></div>
       <h2>Au programme</h2>
       <ul id="liste-aujourdhui" class="liste verre"></ul>
+      <!-- Petit rappel du budget, rempli par budget.js -->
+      <button id="mini-budget" class="verre mini-budget" hidden></button>
     </section>
 
-    <!-- ===== Onglet 2 : TÂCHES ===== -->
+    <!-- ===== Onglet 2 : AGENDA, vue « Liste » ===== -->
     <section id="vue-taches" class="vue">
       <div id="filtres" class="filtres"></div>
       <div id="groupes-taches"></div>
@@ -56,7 +64,7 @@
       </details>
     </section>
 
-    <!-- ===== Onglet 3 : AGENDA ===== -->
+    <!-- ===== Onglet 2 : AGENDA, vue « Semaine » ===== -->
     <section id="vue-agenda" class="vue">
       <div class="verre semaine">
         <div class="nav-semaine">
@@ -73,6 +81,33 @@
       <h2 id="titre-jour"></h2>
       <ul id="liste-jour" class="liste verre"></ul>
     </section>
+
+    <!-- ===== Onglet 3 : BUDGET (tout est dessiné par budget.js) ===== -->
+    <section id="vue-budget" class="vue">
+      <div class="nav-semaine nav-mois">
+        <button id="mois-prec" class="btn-icone" aria-label="Mois précédent">
+          <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <strong id="titre-mois"></strong>
+        <button id="mois-suiv" class="btn-icone" aria-label="Mois suivant">
+          <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <div id="carte-reste" class="verre focus carte-reste"></div>
+
+      <h2>Où part l'argent</h2>
+      <div id="repartition" class="verre bloc"></div>
+
+      <div class="titre-avec-bouton">
+        <h2>Dettes à rembourser</h2>
+        <button id="btn-nouvelle-dette" class="btn-texte">Ajouter</button>
+      </div>
+      <div id="dettes"></div>
+
+      <h2>Mouvements</h2>
+      <div id="mouvements"></div>
+    </section>
   </main>
 
   <!-- Barre d'onglets flottante en verre (style iOS 26) + bouton + à côté -->
@@ -83,13 +118,13 @@
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
         Aujourd'hui
       </button>
-      <button data-vue="taches">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.7 2.7L16.2 9.5"/></svg>
-        Tâches
-      </button>
       <button data-vue="agenda">
         <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
         Agenda
+      </button>
+      <button data-vue="budget">
+        <svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="13" rx="3"/><path d="M2.5 10.5h19"/><path d="M6.5 15h3"/></svg>
+        Budget
       </button>
     </nav>
     <button id="btn-ajouter" class="btn-plus verre-fort" aria-label="Ajouter">
@@ -149,6 +184,77 @@
     </form>
   </dialog>
 
+  <!-- Feuille : ajouter / modifier une dépense ou un revenu -->
+  <dialog id="fenetre-mvt" class="feuille">
+    <form id="form-mvt" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong id="titre-mvt">Nouvelle dépense</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+
+      <div class="segment segment-plein" id="type-mvt">
+        <button type="button" data-type="depense" class="active">Dépense</button>
+        <button type="button" data-type="revenu">Revenu</button>
+      </div>
+
+      <label class="montant">
+        <input name="montant" inputmode="decimal" placeholder="0" autocomplete="off" required>
+        <span>€</span>
+      </label>
+
+      <div class="groupe">
+        <input name="libelle" placeholder="Pour quoi ? (ex. : courses)" autocomplete="off" class="champ-titre">
+      </div>
+
+      <div class="grille-cat" id="grille-cat"></div>
+
+      <div class="groupe">
+        <label class="ligne" id="ligne-dette" hidden>
+          <span class="ico" style="background:#5856d6"><svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span>
+          <span class="libelle">Dette</span>
+          <select name="dette" id="choix-dette"></select>
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#ff3b30"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16"/></svg></span>
+          <span class="libelle">Date</span>
+          <input name="date" type="date" required>
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#34c759"><svg viewBox="0 0 24 24"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/></svg></span>
+          <span class="libelle">Chaque mois</span>
+          <input name="mensuel" type="checkbox" class="interrupteur">
+        </label>
+      </div>
+
+      <button type="button" id="suppr-mvt" class="groupe btn-supprimer">Supprimer</button>
+    </form>
+  </dialog>
+
+  <!-- Feuille : une dette (ex. argent prêté par la famille) -->
+  <dialog id="fenetre-dette" class="feuille">
+    <form id="form-dette" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong id="titre-dette">Nouvelle dette</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div class="groupe">
+        <input name="nom" placeholder="À qui ? (ex. : Papi)" required autocomplete="off" class="champ-titre">
+      </div>
+      <label class="montant">
+        <input name="total" inputmode="decimal" placeholder="Montant total" required autocomplete="off">
+        <span>€</span>
+      </label>
+      <p class="aide">Chaque remboursement s'ajoute avec le bouton +, catégorie « Remboursement ».</p>
+      <button type="button" id="suppr-dette" class="groupe btn-supprimer">Supprimer la dette</button>
+    </form>
+  </dialog>
+
   <script src="app.js"></script>
+  <!-- Un fichier par onglet : plus facile à lire et à modifier -->
+  <script src="budget.js"></script>
 </body>
 </html>
