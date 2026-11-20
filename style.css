@@ -274,7 +274,7 @@ details.faites summary::-webkit-details-marker { display: none; }
 
 /* 4 onglets : leur largeur s'adapte à l'écran (393 px sur l'iPhone 15) */
 .onglets { display: flex; border-radius: 999px; padding: 4px; position: relative;
-  --l-onglet: min(78px, calc((100vw - 32px - 10px - 58px - 8px) / 4)); }
+  --l-onglet: min(84px, calc((100vw - 32px - 8px) / 4)); }
 .onglets button {
   position: relative; z-index: 1;
   border: none; background: none; color: var(--texte); font: inherit;
@@ -560,3 +560,16 @@ dialog form { padding: 8px 16px calc(var(--bas) + 24px); display: flex; flex-dir
 #zone-sport[hidden], .aide[hidden], .segment[hidden] { display: none; }
 #form-objectifs .libelle { flex: 1; white-space: nowrap; }
 #form-objectifs input { width: 90px; flex: none; }
+/* La ligne des calories */
+.ligne-kcal {
+  display: block; width: 100%; text-align: left; border: none; background: rgba(255,149,0,.12);
+  color: var(--texte); font: inherit; font-size: 15px; border-radius: 14px; padding: 10px 12px; margin-top: 16px; cursor: pointer;
+}
+.ligne-kcal strong { color: var(--orange); }
+#form-objectifs select { flex: none; }
+
+/* Le + et le … en haut à droite de chaque page */
+.actions-haut { display: flex; gap: 10px; flex: none; }
+.btn-ajouter { color: #fff !important; background: var(--accent) !important;
+  box-shadow: 0 6px 16px rgba(0,122,255,.35), inset 0 1px 0 rgba(255,255,255,.4) !important; }
+.ligne-kcal .petit { display: block; margin-top: 2px; }

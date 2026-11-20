@@ -34,7 +34,12 @@ const VERT_SPORT = "#30d158";
 //   objectifs:{ pas: 8000, minutes: 30, poids: null }
 // }
 const CLE_FORME = "quotidien.forme.v1";
-const formeVide = () => ({ pas: {}, seances: [], poids: [], objectifs: { pas: 8000, minutes: 30, poids: null } });
+//   profil:   { taille (cm), naissance (année), sexe: "f" | "h" }  ← pour les calories
+const formeVide = () => ({
+  pas: {}, seances: [], poids: [],
+  objectifs: { pas: 8000, minutes: 30, poids: null },
+  profil: { taille: null, naissance: null, sexe: "f" },
+});
 let forme = chargerForme();
 
 function chargerForme() {
@@ -53,6 +58,7 @@ function normaliserForme(f) {
     seances: f?.seances || vide.seances,
     poids: f?.poids || vide.poids,
     objectifs: { ...vide.objectifs, ...(f?.objectifs || {}) },
+    profil: { ...vide.profil, ...(f?.profil || {}) },
   };
 }
 function enregistrerForme() {
@@ -80,6 +86,45 @@ function serie() {
   let n = 0;
   while (pasDu(jour) >= forme.objectifs.pas && n < 3650) { n++; jour = ajouterJours(jour, -1); }
   return n;
+}
+
+// ---------- 3 bis. Les calories (des ESTIMATIONS) ----------
+// L'effort de chaque sport, en « MET » (1 = au repos, assis).
+// Source des valeurs : le Compendium of Physical Activities (Ainsworth et al.).
+const MET = { marche: 3.5, course: 9.8, muscu: 5, escrime: 6, velo: 7, natation: 7, yoga: 2.5, autre: 4 };
+
+function poidsActuel() {
+  const p = peseesTriees();
+  return p.length ? p[p.length - 1].kg : null;
+}
+const ageActuel = () => (forme.profil.naissance ? new Date().getFullYear() - forme.profil.naissance : null);
+
+// Renvoie { bouger, total } en kcal, ou null s'il manque la taille ou le poids
+function calories(jour) {
+  const kg = poidsActuel();
+  const { taille, sexe } = forme.profil;
+  if (!kg || !taille) return null;
+
+  // 1. Les pas → une distance (longueur du pas ≈ 41 % de la taille)
+  //    → environ 0,5 kcal par kilo et par kilomètre de marche.
+  const km = pasDu(jour) * taille * (sexe === "h" ? 0.415 : 0.413) / 100000;
+  const kcalPas = 0.5 * kg * km;
+
+  // 2. Les séances : (MET − 1) × kilos × heures. On retire le « 1 » du repos,
+  //    déjà compté dans le métabolisme. La marche n'est pas recomptée :
+  //    ses pas sont déjà dans le compteur.
+  const kcalSport = forme.seances
+    .filter((s) => s.date === jour && s.type !== "marche")
+    .reduce((t, s) => t + ((MET[s.type] || 4) - 1) * kg * s.minutes / 60, 0);
+
+  const bouger = Math.round(kcalPas + kcalSport);
+
+  // 3. Le métabolisme de base (formule de Mifflin-St Jeor) : ce que le corps
+  //    brûle sans rien faire. + 10 % pour la digestion.
+  const age = ageActuel();
+  if (!age) return { bouger, total: null };
+  const base = 10 * kg + 6.25 * taille - 5 * age + (sexe === "h" ? 5 : -161);
+  return { bouger, total: Math.round(base * 1.1 + bouger) };
 }
 
 // "65,4" → 65.4 ; renvoie null si ce n'est pas un nombre > 0
@@ -163,6 +208,25 @@ function dessinerActivite() {
 
   haut.append(chiffres);
   carte.append(haut);
+
+  // Les calories du jour
+  const kcal = calories(auj);
+  const ligneKcal = el("button", "ligne-kcal");
+  if (!kcal) {
+    ligneKcal.textContent = !forme.profil.taille
+      ? "🔥 Ajoute ta taille et ton âge pour voir tes calories →"
+      : "🔥 Note ton poids pour voir tes calories →";
+    ligneKcal.addEventListener("click", () => (forme.profil.taille ? ouvrirForme("poids") : ouvrirObjectifs()));
+  } else {
+    const fort = el("strong", "", `≈ ${nombre(kcal.bouger)} kcal`);
+    ligneKcal.append("🔥 ", fort, " brûlées en bougeant");
+    if (kcal.total) ligneKcal.append(el("span", "petit", `≈ ${nombre(kcal.total)} kcal sur toute la journée (repos compris)`));
+    ligneKcal.addEventListener("click", () => alert(
+      "Ce sont des estimations, calculées avec ton poids, ta taille, ton âge, tes pas et tes séances.\n\n" +
+      "« En bougeant » : tes pas + ton sport.\n« Sur la journée » : ajoute ce que ton corps brûle au repos (respirer, digérer…)."
+    ));
+  }
+  carte.append(ligneKcal);
 
   const boutons = el("div", "boutons");
   const bPas = el("button", "btn-principal btn-rose", "Noter mes pas");
@@ -441,18 +505,29 @@ document.getElementById("suppr-forme").addEventListener("click", () => {
 const fenObjectifs = document.getElementById("fenetre-objectifs");
 const formObjectifs = document.getElementById("form-objectifs");
 
-document.getElementById("btn-objectifs").addEventListener("click", () => {
+function ouvrirObjectifs() {
   formObjectifs.pas.value = forme.objectifs.pas;
   formObjectifs.minutes.value = forme.objectifs.minutes;
   formObjectifs.poids.value = forme.objectifs.poids ? String(forme.objectifs.poids).replace(".", ",") : "";
+  formObjectifs.taille.value = forme.profil.taille || "";
+  formObjectifs.naissance.value = forme.profil.naissance || "";
+  formObjectifs.sexe.value = forme.profil.sexe;
   fenObjectifs.showModal();
-});
+}
+document.getElementById("btn-objectifs").addEventListener("click", ouvrirObjectifs);
 
 formObjectifs.addEventListener("submit", () => {
   forme.objectifs = {
     pas: Math.round(lireNombre(formObjectifs.pas.value) || forme.objectifs.pas),
     minutes: Math.round(lireNombre(formObjectifs.minutes.value) || forme.objectifs.minutes),
     poids: lireNombre(formObjectifs.poids.value) ? Math.round(lireNombre(formObjectifs.poids.value) * 10) / 10 : null,
+  };
+  const taille = lireNombre(formObjectifs.taille.value);
+  const annee = lireNombre(formObjectifs.naissance.value);
+  forme.profil = {
+    taille: taille && taille > 100 && taille < 250 ? Math.round(taille) : null,   // en cm
+    naissance: annee && annee > 1900 && annee <= new Date().getFullYear() ? Math.round(annee) : null,
+    sexe: formObjectifs.sexe.value,
   };
   enregistrerForme();
   afficher();

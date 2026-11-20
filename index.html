@@ -39,10 +39,15 @@
         <p id="sous-titre" class="surtitre"></p>
         <h1 id="titre">Aujourd'hui</h1>
       </div>
-      <!-- Bouton Réglages (sauvegarde), comme le « … » rond des apps Apple -->
-      <button id="btn-reglages" class="btn-rond-verre verre" aria-label="Réglages et sauvegarde">
-        <svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>
-      </button>
+      <!-- En haut à droite, comme dans les apps Apple : + (ajouter) et … (réglages) -->
+      <div class="actions-haut">
+        <button id="btn-ajouter" class="btn-rond-verre btn-ajouter verre" aria-label="Ajouter">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button id="btn-reglages" class="btn-rond-verre verre" aria-label="Réglages et sauvegarde">
+          <svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>
+        </button>
+      </div>
     </div>
 
     <!-- Rappel : pas de sauvegarde depuis longtemps (rempli par sauvegarde.js) -->
@@ -136,13 +141,13 @@
       <div class="groupe groupe-verre verre">
         <button type="button" class="ligne ligne-bouton" id="btn-objectifs">
           <span class="ico" style="background:#ff2d55"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8"/></svg></span>
-          <span class="libelle">Mes objectifs</span>
+          <span class="libelle">Moi et mes objectifs</span>
         </button>
       </div>
     </section>
   </main>
 
-  <!-- Barre d'onglets flottante en verre (style iOS 26) + bouton + à côté -->
+  <!-- Barre d'onglets flottante en verre (style iOS 26), seule et centrée -->
   <div class="dock">
     <nav class="onglets verre-fort">
       <span class="pilule" id="pilule" aria-hidden="true"></span>
@@ -163,9 +168,6 @@
         Forme
       </button>
     </nav>
-    <button id="btn-ajouter" class="btn-plus verre-fort" aria-label="Ajouter">
-      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-    </button>
   </div>
 
   <!-- Feuille qui monte du bas pour ajouter / modifier une tâche -->
@@ -336,7 +338,7 @@
       <div class="poignee" aria-hidden="true"></div>
       <div class="entete-feuille">
         <button type="button" class="btn-texte" data-fermer>Annuler</button>
-        <strong>Mes objectifs</strong>
+        <strong>Moi et mes objectifs</strong>
         <button type="submit" class="btn-texte fort">OK</button>
       </div>
       <div class="groupe">
@@ -354,6 +356,24 @@
           <span class="ico" style="background:#007aff"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9.5a4 4 0 0 1 6 0L12 13z"/></svg></span>
           <span class="libelle">Poids visé (kg)</span>
           <input name="poids" inputmode="decimal" placeholder="facultatif" autocomplete="off">
+        </label>
+      </div>
+      <h3 class="titre-groupe" style="margin-top:6px">Moi (pour les calories)</h3>
+      <div class="groupe">
+        <label class="ligne">
+          <span class="ico" style="background:#ff9500"><svg viewBox="0 0 24 24"><path d="M12 3v18M8 6h4M8 10h4M8 14h4M8 18h4"/></svg></span>
+          <span class="libelle">Taille (cm)</span>
+          <input name="taille" inputmode="numeric" placeholder="165" autocomplete="off">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#af52de"><svg viewBox="0 0 24 24"><path d="M5 20h14v-6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M12 12V8M12 5.5v-.5"/></svg></span>
+          <span class="libelle">Année de naissance</span>
+          <input name="naissance" inputmode="numeric" placeholder="2000" autocomplete="off">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#8e8e93"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
+          <span class="libelle">Calcul pour</span>
+          <select name="sexe"><option value="f">une femme</option><option value="h">un homme</option></select>
         </label>
       </div>
       <p class="aide aide-groupe">L'app Santé compte tes pas toute seule : chaque soir, recopie le chiffre ici (bouton « Noter mes pas »).</p>
