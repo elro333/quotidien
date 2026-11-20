@@ -1,0 +1,138 @@
+<!doctype html>
+<!--
+  index.html = le SQUELETTE de l'appli (ce qu'il y a à l'écran).
+  style.css  = l'APPARENCE (couleurs, verre, arrondis).
+  app.js     = le COMPORTEMENT (ce qui se passe quand tu touches un bouton).
+-->
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <!-- viewport-fit=cover : l'appli occupe tout l'écran de l'iPhone, encoche comprise -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mon quotidien</title>
+
+  <!-- Ces lignes rendent l'appli "installable" sur l'iPhone -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Quotidien">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Le fond coloré flou : c'est lui qu'on voit "à travers le verre" -->
+  <div class="fond-couleurs" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <!-- Barre du haut : invisible en haut de page, devient du verre quand on fait défiler -->
+  <header class="barre-haut" id="barre-haut">
+    <span id="titre-petit"></span>
+  </header>
+
+  <main>
+    <div class="grand-titre">
+      <p id="sous-titre" class="surtitre"></p>
+      <h1 id="titre">Aujourd'hui</h1>
+    </div>
+
+    <!-- ===== Onglet 1 : AUJOURD'HUI ===== -->
+    <section id="vue-aujourdhui" class="vue active">
+      <div id="carte-focus" class="verre focus"></div>
+      <h2>Au programme</h2>
+      <ul id="liste-aujourdhui" class="liste verre"></ul>
+    </section>
+
+    <!-- ===== Onglet 2 : TÂCHES ===== -->
+    <section id="vue-taches" class="vue">
+      <div id="filtres" class="filtres"></div>
+      <div id="groupes-taches"></div>
+      <details class="faites">
+        <summary id="resume-faites">Faites</summary>
+        <ul id="liste-faites" class="liste verre"></ul>
+      </details>
+    </section>
+
+    <!-- ===== Onglet 3 : AGENDA ===== -->
+    <section id="vue-agenda" class="vue">
+      <div class="verre semaine">
+        <div class="nav-semaine">
+          <button id="semaine-prec" class="btn-icone" aria-label="Semaine précédente">
+            <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <strong id="titre-semaine"></strong>
+          <button id="semaine-suiv" class="btn-icone" aria-label="Semaine suivante">
+            <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div id="bande-jours" class="bande-jours"></div>
+      </div>
+      <h2 id="titre-jour"></h2>
+      <ul id="liste-jour" class="liste verre"></ul>
+    </section>
+  </main>
+
+  <!-- Barre d'onglets flottante en verre (style iOS 26) + bouton + à côté -->
+  <div class="dock">
+    <nav class="onglets verre-fort">
+      <span class="pilule" id="pilule" aria-hidden="true"></span>
+      <button data-vue="aujourdhui" class="active">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        Aujourd'hui
+      </button>
+      <button data-vue="taches">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.7 2.7L16.2 9.5"/></svg>
+        Tâches
+      </button>
+      <button data-vue="agenda">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+        Agenda
+      </button>
+    </nav>
+    <button id="btn-ajouter" class="btn-plus verre-fort" aria-label="Ajouter">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+
+  <!-- Feuille qui monte du bas pour ajouter / modifier une tâche -->
+  <dialog id="fenetre" class="feuille">
+    <form id="formulaire" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" id="btn-annuler" class="btn-texte">Annuler</button>
+        <strong id="titre-fenetre">Nouvelle tâche</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+
+      <div class="groupe">
+        <input name="titre" required placeholder="Titre" autocomplete="off" class="champ-titre">
+        <textarea name="note" rows="2" placeholder="Note"></textarea>
+      </div>
+
+      <div class="groupe">
+        <label class="ligne">
+          <span class="ico" style="background:#ff3b30"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16"/></svg></span>
+          <span class="libelle">Date</span>
+          <input name="date" type="date">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#007aff"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg></span>
+          <span class="libelle">Heure</span>
+          <input name="heure" type="time">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#8e8e93"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+          <span class="libelle">Catégorie</span>
+          <select name="cat" id="choix-cat"></select>
+        </label>
+      </div>
+
+      <button type="button" id="btn-supprimer" class="groupe btn-supprimer">Supprimer la tâche</button>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

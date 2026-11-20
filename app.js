@@ -1,0 +1,407 @@
+// ============================================================
+// app.js — le comportement de l'appli
+//
+// Le principe, à retenir : on garde toutes les tâches dans une
+// liste (un "tableau"). Chaque fois que quelque chose change,
+// on (1) enregistre la liste, puis (2) on redessine l'écran.
+// ============================================================
+
+// ---------- 1. Les catégories ----------
+const CATEGORIES = {
+  cours:      { nom: "Cours",      couleur: "var(--bleu)" },
+  reserve:    { nom: "Réserve",    couleur: "var(--vert)" },
+  delegation: { nom: "Délégation", couleur: "var(--violet)" },
+  perso:      { nom: "Perso",      couleur: "var(--orange)" },
+  admin:      { nom: "Admin",      couleur: "var(--gris)" },
+};
+
+// ---------- 2. Les données ----------
+// Une tâche ressemble à ça :
+// { id, titre, date: "2026-11-21", heure: "14:00", cat: "cours", note, fait: false, creeLe }
+const CLE = "quotidien.taches.v1";
+let taches = charger();
+
+function charger() {
+  try {
+    return JSON.parse(localStorage.getItem(CLE)) || [];
+  } catch (e) {
+    return []; // si le stockage est indisponible, on démarre vide
+  }
+}
+
+function enregistrer() {
+  try {
+    localStorage.setItem(CLE, JSON.stringify(taches));
+  } catch (e) {
+    alert("Impossible d'enregistrer sur cet appareil.");
+  }
+}
+
+// ---------- 3. Petits outils pour les dates ----------
+// On écrit les dates "AAAA-MM-JJ" : c'est ce que donne <input type="date">.
+function enTexte(d) {
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const j = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${j}`;
+}
+function versDate(txt) {
+  const [a, m, j] = txt.split("-").map(Number);
+  return new Date(a, m - 1, j);
+}
+function ajouterJours(txt, n) {
+  const d = versDate(txt);
+  d.setDate(d.getDate() + n);
+  return enTexte(d);
+}
+const aujourdhui = () => enTexte(new Date());
+
+const JOURS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+const JOURS_LONGS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+
+function jolieDate(txt) {
+  const d = versDate(txt);
+  return `${JOURS_LONGS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`;
+}
+
+// Ordre de tri : d'abord les tâches datées (par jour puis heure), puis sans date.
+function trier(a, b) {
+  const da = a.date || "9999", db = b.date || "9999";
+  if (da !== db) return da < db ? -1 : 1;
+  const ha = a.heure || "99", hb = b.heure || "99";
+  if (ha !== hb) return ha < hb ? -1 : 1;
+  return a.creeLe - b.creeLe;
+}
+
+// ---------- 4. Navigation entre onglets ----------
+const TITRES = { aujourdhui: "Aujourd'hui", taches: "Tâches", agenda: "Agenda" };
+let vueActive = "aujourdhui";
+
+document.querySelectorAll(".onglets button").forEach((bouton) => {
+  bouton.addEventListener("click", () => {
+    vueActive = bouton.dataset.vue;
+    document.querySelectorAll(".onglets button").forEach((b) => b.classList.toggle("active", b === bouton));
+    document.querySelectorAll(".vue").forEach((v) => v.classList.toggle("active", v.id === "vue-" + vueActive));
+    afficher();
+  });
+});
+
+// ---------- 5. Fabriquer une ligne de tâche ----------
+// On construit les éléments un par un (plutôt que du HTML en texte)
+// pour qu'un titre ne puisse jamais "casser" la page.
+function ligneTache(t, { montrerDate = true } = {}) {
+  const li = document.createElement("li");
+  if (t.fait) li.classList.add("fait");
+
+  const caseBtn = document.createElement("button");
+  caseBtn.className = "case" + (t.fait ? " cochee" : "");
+  caseBtn.style.setProperty("--couleur", CATEGORIES[t.cat]?.couleur || "var(--accent)");
+  caseBtn.setAttribute("aria-label", t.fait ? "Marquer à faire" : "Marquer faite");
+  caseBtn.addEventListener("click", () => basculer(t.id));
+
+  const infos = document.createElement("div");
+  infos.className = "infos";
+  infos.addEventListener("click", () => ouvrirFenetre(t));
+
+  const titre = document.createElement("div");
+  titre.className = "t";
+  titre.textContent = t.titre;
+
+  const meta = document.createElement("div");
+  meta.className = "m";
+  const morceaux = [];
+  if (montrerDate && t.date) morceaux.push(jolieDate(t.date));
+  if (t.heure) morceaux.push(t.heure.replace(":", "h"));
+  morceaux.push(CATEGORIES[t.cat]?.nom || "");
+  meta.textContent = morceaux.filter(Boolean).join(" · ");
+  if (!t.fait && t.date && t.date < aujourdhui()) {
+    meta.classList.add("retard");
+    meta.textContent = "En retard · " + meta.textContent;
+  }
+
+  infos.append(titre, meta);
+
+  const pastille = document.createElement("span");
+  pastille.className = "pastille";
+  pastille.style.background = CATEGORIES[t.cat]?.couleur || "var(--doux)";
+
+  li.append(caseBtn, infos, pastille);
+  return li;
+}
+
+function remplir(ul, liste, options) {
+  ul.replaceChildren(...liste.map((t) => ligneTache(t, options)));
+}
+
+// ---------- 6. Onglet AUJOURD'HUI ----------
+// L'idée anti-éparpillement : UNE seule tâche mise en avant.
+let tachesPassees = []; // celles où tu as dit "pas maintenant" (le temps de la session)
+
+function afficherAujourdhui() {
+  const auj = aujourdhui();
+  const aFaire = taches.filter((t) => !t.fait).sort(trier);
+
+  // Candidates : en retard + aujourd'hui, puis sans date
+  let candidates = aFaire.filter((t) => t.date && t.date <= auj);
+  if (candidates.length === 0) candidates = aFaire.filter((t) => !t.date);
+  const restantes = candidates.filter((t) => !tachesPassees.includes(t.id));
+  const focus = restantes[0] || candidates[0];
+
+  const carte = document.getElementById("carte-focus");
+  carte.replaceChildren();
+  carte.classList.toggle("vide", !focus);
+
+  if (!focus) {
+    const emoji = document.createElement("span");
+    emoji.className = "grand-emoji";
+    emoji.textContent = aFaire.length ? "🌿" : "✨";
+    carte.append(emoji, aFaire.length
+      ? "Rien de prévu aujourd'hui. Profite, ou avance sur une tâche de la semaine."
+      : "Aucune tâche pour l'instant. Touche + pour en ajouter une.");
+  } else {
+    const etiquette = document.createElement("div");
+    etiquette.className = "etiquette";
+    etiquette.textContent = "Ta prochaine petite tâche";
+
+    const titre = document.createElement("div");
+    titre.className = "tache-titre";
+    titre.textContent = focus.titre;
+
+    const meta = document.createElement("div");
+    const enRetard = focus.date && focus.date < auj;
+    meta.className = "muted" + (enRetard ? " retard" : "");
+    meta.textContent = [
+      enRetard ? "En retard (" + jolieDate(focus.date) + ")" : "",
+      focus.heure ? focus.heure.replace(":", "h") : "",
+      CATEGORIES[focus.cat]?.nom,
+    ].filter(Boolean).join(" · ");
+
+    const boutons = document.createElement("div");
+    boutons.className = "boutons";
+    const fait = document.createElement("button");
+    fait.className = "btn-principal";
+    fait.textContent = "C'est fait ✓";
+    fait.addEventListener("click", () => basculer(focus.id));
+    const plusTard = document.createElement("button");
+    plusTard.className = "btn-secondaire";
+    plusTard.textContent = "Plus tard";
+    plusTard.addEventListener("click", () => {
+      tachesPassees.push(focus.id);
+      if (candidates.every((t) => tachesPassees.includes(t.id))) tachesPassees = [];
+      afficher();
+    });
+    boutons.append(fait, plusTard);
+
+    carte.append(etiquette, titre, meta, boutons);
+  }
+
+  const duJour = taches.filter((t) => t.date === auj).sort(trier);
+  remplir(document.getElementById("liste-aujourdhui"), duJour, { montrerDate: false });
+}
+
+// ---------- 7. Onglet TÂCHES ----------
+let filtre = "toutes";
+
+function afficherFiltres() {
+  const zone = document.getElementById("filtres");
+  const choix = { toutes: "Toutes", ...Object.fromEntries(Object.entries(CATEGORIES).map(([k, c]) => [k, c.nom])) };
+  zone.replaceChildren(
+    ...Object.entries(choix).map(([cle, nom]) => {
+      const b = document.createElement("button");
+      b.textContent = nom;
+      b.classList.toggle("active", cle === filtre);
+      b.addEventListener("click", () => { filtre = cle; afficher(); });
+      return b;
+    })
+  );
+}
+
+function afficherTaches() {
+  afficherFiltres();
+  const auj = aujourdhui();
+  const demain = ajouterJours(auj, 1);
+  const visibles = taches.filter((t) => filtre === "toutes" || t.cat === filtre).sort(trier);
+  const aFaire = visibles.filter((t) => !t.fait);
+
+  const groupes = [
+    ["En retard", aFaire.filter((t) => t.date && t.date < auj)],
+    ["Aujourd'hui", aFaire.filter((t) => t.date === auj)],
+    ["Demain", aFaire.filter((t) => t.date === demain)],
+    ["Plus tard", aFaire.filter((t) => t.date && t.date > demain)],
+    ["Sans date", aFaire.filter((t) => !t.date)],
+  ];
+
+  const zone = document.getElementById("groupes-taches");
+  zone.replaceChildren();
+  for (const [nom, liste] of groupes) {
+    if (!liste.length) continue;
+    const h = document.createElement("h2");
+    h.textContent = `${nom} · ${liste.length}`;
+    const ul = document.createElement("ul");
+    ul.className = "liste";
+    remplir(ul, liste, { montrerDate: nom === "Plus tard" || nom === "En retard" });
+    zone.append(h, ul);
+  }
+  if (!aFaire.length) {
+    const p = document.createElement("p");
+    p.className = "vide-msg";
+    p.textContent = "Rien à faire ici 🎉";
+    zone.append(p);
+  }
+
+  const faites = visibles.filter((t) => t.fait);
+  document.getElementById("resume-faites").textContent = `Faites · ${faites.length}`;
+  remplir(document.getElementById("liste-faites"), faites.reverse());
+}
+
+// ---------- 8. Onglet AGENDA ----------
+let jourChoisi = aujourdhui();
+
+function lundiDe(txt) {
+  const d = versDate(txt);
+  const decalage = (d.getDay() + 6) % 7; // lundi = 0
+  return ajouterJours(txt, -decalage);
+}
+
+function afficherAgenda() {
+  const lundi = lundiDe(jourChoisi);
+  const dimanche = ajouterJours(lundi, 6);
+  const dl = versDate(lundi), dd = versDate(dimanche);
+  document.getElementById("titre-semaine").textContent =
+    `${dl.getDate()} ${MOIS[dl.getMonth()]} – ${dd.getDate()} ${MOIS[dd.getMonth()]}`;
+
+  const bande = document.getElementById("bande-jours");
+  bande.replaceChildren();
+  for (let i = 0; i < 7; i++) {
+    const jour = ajouterJours(lundi, i);
+    const d = versDate(jour);
+    const b = document.createElement("button");
+    if (jour === aujourdhui()) b.classList.add("auj");
+    if (jour === jourChoisi) b.classList.add("choisi");
+
+    const nom = document.createElement("span");
+    nom.textContent = JOURS[d.getDay()];
+    const num = document.createElement("b");
+    num.textContent = d.getDate();
+    const points = document.createElement("span");
+    points.className = "points";
+    const nb = taches.filter((t) => t.date === jour && !t.fait).length;
+    for (let k = 0; k < Math.min(nb, 3); k++) points.append(document.createElement("i"));
+
+    b.append(nom, num, points);
+    b.addEventListener("click", () => { jourChoisi = jour; afficher(); });
+    bande.append(b);
+  }
+
+  document.getElementById("titre-jour").textContent = jolieDate(jourChoisi);
+  const duJour = taches.filter((t) => t.date === jourChoisi).sort(trier);
+  const ul = document.getElementById("liste-jour");
+  remplir(ul, duJour, { montrerDate: false });
+  if (!duJour.length) {
+    const li = document.createElement("li");
+    li.className = "vide-msg";
+    li.textContent = "Rien ce jour-là.";
+    ul.append(li);
+  }
+}
+
+document.getElementById("semaine-prec").addEventListener("click", () => { jourChoisi = ajouterJours(jourChoisi, -7); afficher(); });
+document.getElementById("semaine-suiv").addEventListener("click", () => { jourChoisi = ajouterJours(jourChoisi, 7); afficher(); });
+
+// ---------- 9. Ajouter / modifier / supprimer ----------
+const fenetre = document.getElementById("fenetre");
+const formulaire = document.getElementById("formulaire");
+let enEdition = null; // la tâche qu'on modifie (null = nouvelle tâche)
+
+document.getElementById("choix-cat").replaceChildren(
+  ...Object.entries(CATEGORIES).map(([cle, c]) => new Option(c.nom, cle))
+);
+
+function ouvrirFenetre(tache = null) {
+  enEdition = tache;
+  document.getElementById("titre-fenetre").textContent = tache ? "Modifier" : "Nouvelle tâche";
+  document.getElementById("btn-supprimer").style.display = tache ? "" : "none";
+  formulaire.titre.value = tache?.titre || "";
+  // Nouvelle tâche depuis l'agenda : pré-remplie au jour affiché
+  formulaire.date.value = tache ? tache.date || "" : (vueActive === "agenda" ? jourChoisi : aujourdhui());
+  formulaire.heure.value = tache?.heure || "";
+  formulaire.cat.value = tache?.cat || "perso";
+  formulaire.note.value = tache?.note || "";
+  fenetre.showModal();
+  if (!tache) formulaire.titre.focus();
+}
+
+document.getElementById("btn-ajouter").addEventListener("click", () => ouvrirFenetre());
+document.getElementById("btn-annuler").addEventListener("click", () => fenetre.close());
+
+formulaire.addEventListener("submit", () => {
+  const valeurs = {
+    titre: formulaire.titre.value.trim(),
+    date: formulaire.date.value,
+    heure: formulaire.heure.value,
+    cat: formulaire.cat.value,
+    note: formulaire.note.value.trim(),
+  };
+  if (!valeurs.titre) return;
+  if (enEdition) {
+    Object.assign(enEdition, valeurs);
+  } else {
+    taches.push({ id: crypto.randomUUID?.() || String(Date.now()), fait: false, creeLe: Date.now(), ...valeurs });
+  }
+  enregistrer();
+  afficher();
+});
+
+document.getElementById("btn-supprimer").addEventListener("click", () => {
+  if (!enEdition || !confirm("Supprimer cette tâche ?")) return;
+  taches = taches.filter((t) => t.id !== enEdition.id);
+  enregistrer();
+  fenetre.close();
+  afficher();
+});
+
+function basculer(id) {
+  const t = taches.find((x) => x.id === id);
+  if (!t) return;
+  t.fait = !t.fait;
+  enregistrer();
+  afficher();
+}
+
+// ---------- 10. Tout redessiner ----------
+function afficher() {
+  document.getElementById("titre").textContent = TITRES[vueActive];
+  document.getElementById("titre-petit").textContent = TITRES[vueActive];
+  const sous = document.getElementById("sous-titre");
+  const restantes = taches.filter((t) => !t.fait && t.date && t.date <= aujourdhui()).length;
+  sous.textContent = vueActive === "aujourdhui"
+    ? jolieDate(aujourdhui()) + (restantes ? ` · ${restantes} à faire` : "")
+    : vueActive === "taches" ? `${taches.filter((t) => !t.fait).length} à faire` : "Semaine";
+  placerPilule();
+
+  if (vueActive === "aujourdhui") afficherAujourdhui();
+  if (vueActive === "taches") afficherTaches();
+  if (vueActive === "agenda") afficherAgenda();
+}
+
+// La pilule de verre glisse sous l'onglet choisi
+function placerPilule() {
+  const actif = document.querySelector(".onglets button.active");
+  document.getElementById("pilule").style.transform = `translateX(${actif.offsetLeft}px)`;
+}
+
+// La barre du haut devient du verre dès qu'on fait défiler
+const barreHaut = document.getElementById("barre-haut");
+window.addEventListener("scroll", () => barreHaut.classList.toggle("defile", window.scrollY > 40), { passive: true });
+
+// Toucher le fond sombre ferme la feuille
+fenetre.addEventListener("click", (e) => { if (e.target === fenetre) fenetre.close(); });
+
+afficher();
+
+// ---------- 11. Mode hors-ligne ----------
+// Le "service worker" garde une copie de l'appli sur l'iPhone :
+// elle s'ouvre même sans réseau.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}

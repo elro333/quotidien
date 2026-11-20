@@ -1,0 +1,293 @@
+/* ============================================================
+   style.css — l'apparence, façon iOS 26 « Liquid Glass »
+
+   Le secret du verre :
+   1. un fond coloré derrière (.fond-couleurs) ;
+   2. des surfaces à moitié transparentes ;
+   3. backdrop-filter: blur(...) qui floute ce qu'il y a derrière ;
+   4. un liseré clair en haut, comme un reflet de lumière.
+   ============================================================ */
+:root {
+  /* Couleurs système d'Apple */
+  --bleu: #007aff;
+  --vert: #34c759;
+  --rouge: #ff3b30;
+  --orange: #ff9500;
+  --violet: #af52de;
+  --indigo: #5856d6;
+  --cyan: #32ade6;
+  --gris: #8e8e93;
+
+  --accent: var(--bleu);
+  --fond: #f2f2f7;
+  --texte: #000;
+  --texte-2: rgba(60, 60, 67, .6);   /* texte secondaire iOS */
+  --separateur: rgba(60, 60, 67, .18);
+  --rangee: rgba(255, 255, 255, .72);
+
+  /* Le verre */
+  --verre: rgba(255, 255, 255, .52);
+  --verre-fort: rgba(255, 255, 255, .38);
+  --reflet: rgba(255, 255, 255, .85);
+  --bord-verre: rgba(255, 255, 255, .55);
+  --ombre: 0 10px 40px rgba(0, 0, 0, .08), 0 2px 8px rgba(0, 0, 0, .04);
+
+  --bas: env(safe-area-inset-bottom, 0px);
+  --haut: env(safe-area-inset-top, 0px);
+  --police: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: #0a84ff;
+    --fond: #000;
+    --texte: #fff;
+    --texte-2: rgba(235, 235, 245, .6);
+    --separateur: rgba(84, 84, 88, .55);
+    --rangee: rgba(44, 44, 46, .7);
+    --verre: rgba(40, 40, 44, .5);
+    --verre-fort: rgba(50, 50, 55, .42);
+    --reflet: rgba(255, 255, 255, .22);
+    --bord-verre: rgba(255, 255, 255, .12);
+    --ombre: 0 10px 40px rgba(0, 0, 0, .5);
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: var(--police);
+  font-size: 17px;               /* taille de texte standard d'iOS */
+  line-height: 1.3;
+  letter-spacing: -0.2px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Le fond coloré (trois taches floues) ---------- */
+.fond-couleurs { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+.fond-couleurs i { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55; }
+.fond-couleurs i:nth-child(1) { width: 70vw; height: 70vw; background: #7fb2ff; top: -20vw; left: -15vw; }
+.fond-couleurs i:nth-child(2) { width: 60vw; height: 60vw; background: #ffb3c7; top: 30vh; right: -25vw; }
+.fond-couleurs i:nth-child(3) { width: 65vw; height: 65vw; background: #ffd59a; bottom: -20vw; left: 5vw; opacity: .45; }
+@media (prefers-color-scheme: dark) {
+  .fond-couleurs i { opacity: .28; }
+}
+
+/* ---------- Les surfaces en verre ---------- */
+.verre, .verre-fort {
+  position: relative;
+  background: var(--verre);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  border: 0.5px solid var(--bord-verre);
+  box-shadow: inset 0 1px 0 var(--reflet), var(--ombre);
+}
+.verre-fort {
+  background: var(--verre-fort);
+  -webkit-backdrop-filter: blur(20px) saturate(200%) brightness(1.05);
+  backdrop-filter: blur(20px) saturate(200%) brightness(1.05);
+  box-shadow: inset 0 1px 1px var(--reflet), inset 0 -1px 1px rgba(255,255,255,.12), 0 12px 40px rgba(0,0,0,.14);
+}
+
+/* ---------- Barre du haut ---------- */
+.barre-haut {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  height: calc(var(--haut) + 44px); padding-top: var(--haut);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 17px;
+  transition: background .25s, box-shadow .25s;
+}
+.barre-haut span { opacity: 0; transition: opacity .2s; }
+.barre-haut.defile {
+  background: var(--verre);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: 0 0.5px 0 var(--separateur);
+}
+.barre-haut.defile span { opacity: 1; }
+
+main { padding: calc(var(--haut) + 44px) 16px calc(var(--bas) + 130px); max-width: 640px; margin: 0 auto; }
+
+.grand-titre { padding: 6px 4px 8px; }
+.grand-titre h1 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: .3px; }
+.surtitre { margin: 0; font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--texte-2); letter-spacing: 0; }
+
+h2 { font-size: 20px; font-weight: 700; margin: 26px 4px 10px; letter-spacing: .2px; }
+
+.vue { display: none; }
+.vue.active { display: block; animation: apparait .28s cubic-bezier(.2,.8,.2,1); }
+@keyframes apparait { from { opacity: 0; transform: translateY(6px); } }
+
+/* ---------- Carte « prochaine petite tâche » ---------- */
+.focus { border-radius: 28px; padding: 20px; margin-top: 8px; overflow: hidden; }
+.focus::before {               /* reflet de lumière en haut à gauche */
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(120% 80% at 0% 0%, rgba(255,255,255,.45), transparent 55%);
+}
+@media (prefers-color-scheme: dark) { .focus::before { background: radial-gradient(120% 80% at 0% 0%, rgba(255,255,255,.08), transparent 55%); } }
+.focus .etiquette { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--accent); }
+.focus .etiquette::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.focus .tache-titre { font-size: 26px; font-weight: 700; margin: 10px 0 4px; letter-spacing: .1px; line-height: 1.15; }
+.focus .muted { color: var(--texte-2); font-size: 15px; margin: 0; }
+.focus .muted.retard { color: var(--rouge); }
+.focus .boutons { display: flex; gap: 10px; margin-top: 20px; }
+.focus .boutons button { flex: 1; }
+.focus.vide { text-align: center; color: var(--texte-2); padding: 28px 20px; font-size: 15px; }
+.focus.vide .grand-emoji { display: block; font-size: 40px; margin-bottom: 8px; }
+
+/* Boutons en forme de pilule */
+.btn-principal, .btn-secondaire {
+  border: none; border-radius: 999px; padding: 14px 18px; font: inherit; font-weight: 600; font-size: 16px;
+  transition: transform .15s, filter .15s;
+}
+.btn-principal { background: var(--accent); color: #fff; box-shadow: 0 6px 18px rgba(0,122,255,.3), inset 0 1px 0 rgba(255,255,255,.35); }
+.btn-secondaire { background: rgba(120,120,128,.16); color: var(--texte); }
+button:active { transform: scale(.96); }
+
+/* ---------- Listes (style « Rappels ») ---------- */
+.liste { list-style: none; margin: 0; padding: 0; border-radius: 22px; overflow: hidden; }
+.liste:empty { display: none; }
+.liste li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; position: relative; }
+.liste li + li::before {   /* séparateur fin, décalé comme sur iOS */
+  content: ""; position: absolute; top: 0; left: 54px; right: 0; height: 0.5px; background: var(--separateur);
+}
+.liste .infos { flex: 1; min-width: 0; cursor: pointer; }
+.liste .t { font-size: 17px; overflow-wrap: anywhere; }
+.liste .m { font-size: 14px; color: var(--texte-2); margin-top: 1px; }
+.liste .m.retard { color: var(--rouge); }
+.liste li.fait .t { color: var(--texte-2); }
+.liste li.vide-msg { color: var(--texte-2); justify-content: center; padding: 18px; font-size: 15px; }
+.vide-msg { color: var(--texte-2); text-align: center; padding: 30px 0; }
+
+/* Case ronde, comme dans Rappels */
+.case {
+  width: 24px; height: 24px; flex: none; border-radius: 50%; padding: 0; cursor: pointer;
+  border: 1.6px solid rgba(120,120,128,.45); background: none;
+  display: grid; place-items: center; transition: all .2s;
+}
+.case.cochee { border-color: var(--couleur, var(--accent)); }
+.case.cochee::after { content: ""; width: 14px; height: 14px; border-radius: 50%; background: var(--couleur, var(--accent)); }
+
+.pastille { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+/* ---------- Filtres (puces en verre) ---------- */
+.filtres { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; scrollbar-width: none; }
+.filtres::-webkit-scrollbar { display: none; }
+.filtres button {
+  border: 0.5px solid var(--bord-verre); background: var(--verre); color: var(--texte);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: inset 0 1px 0 var(--reflet);
+  border-radius: 999px; padding: 8px 15px; font: inherit; font-size: 15px; font-weight: 500; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.filtres button.active { background: var(--texte); color: var(--fond); border-color: transparent; }
+
+details.faites { margin-top: 26px; }
+details.faites summary { color: var(--accent); cursor: pointer; padding: 4px; list-style: none; font-size: 15px; font-weight: 500; margin-bottom: 10px; }
+details.faites summary::-webkit-details-marker { display: none; }
+
+/* ---------- Agenda ---------- */
+.semaine { border-radius: 26px; padding: 12px; margin-top: 8px; }
+.nav-semaine { display: flex; align-items: center; justify-content: space-between; padding: 0 2px 10px; }
+.nav-semaine strong { font-size: 16px; font-weight: 600; }
+.btn-icone {
+  width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(120,120,128,.14);
+  color: var(--accent); display: grid; place-items: center; padding: 0;
+}
+.btn-icone svg { width: 18px; height: 18px; stroke-width: 2.4; }
+.bande-jours { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.bande-jours button {
+  border: none; background: none; color: var(--texte); border-radius: 16px; padding: 6px 0 4px; font: inherit;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.bande-jours button span:first-child { font-size: 12px; color: var(--texte-2); text-transform: uppercase; font-weight: 500; }
+.bande-jours button b { font-size: 19px; font-weight: 600; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; }
+.bande-jours button.auj b { color: var(--rouge); }
+.bande-jours button.choisi b { background: var(--texte); color: var(--fond); }
+.bande-jours button.choisi.auj b { background: var(--rouge); color: #fff; }
+.bande-jours .points { height: 5px; display: flex; gap: 3px; }
+.bande-jours .points i { width: 5px; height: 5px; border-radius: 50%; background: var(--texte-2); }
+
+/* ---------- Dock : barre d'onglets flottante + bouton + ---------- */
+.dock {
+  position: fixed; left: 0; right: 0; bottom: calc(var(--bas) + 12px); z-index: 20;
+  display: flex; justify-content: center; align-items: center; gap: 10px; padding: 0 16px;
+  pointer-events: none;
+}
+.dock > * { pointer-events: auto; }
+
+.onglets { display: flex; border-radius: 999px; padding: 4px; position: relative; }
+.onglets button {
+  position: relative; z-index: 1;
+  border: none; background: none; color: var(--texte); font: inherit;
+  width: 88px; padding: 6px 0 5px; border-radius: 999px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0;
+  transition: color .25s;
+}
+.onglets button svg { width: 25px; height: 25px; }
+.onglets button.active { color: var(--accent); }
+/* La pilule qui glisse sous l'onglet actif */
+.pilule {
+  position: absolute; top: 4px; bottom: 4px; left: 0; width: 88px; border-radius: 999px;
+  background: rgba(120,120,128,.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+  transition: transform .45s cubic-bezier(.3,1.4,.5,1);
+}
+
+.btn-plus {
+  width: 62px; height: 62px; border-radius: 50%; border: none; flex: none;
+  display: grid; place-items: center; color: var(--accent); padding: 0;
+}
+.btn-plus svg { width: 28px; height: 28px; stroke-width: 2.4; }
+
+/* ---------- Feuille (sheet) qui monte du bas ---------- */
+dialog.feuille {
+  margin: auto auto 0; width: 100%; max-width: 560px; max-height: 92vh;
+  border: none; padding: 0; border-radius: 34px 34px 0 0;
+  background: var(--fond); color: var(--texte);
+  box-shadow: 0 -10px 40px rgba(0,0,0,.15);
+}
+dialog.feuille[open] { animation: monte .42s cubic-bezier(.2,.9,.25,1); }
+@keyframes monte { from { transform: translateY(100%); } }
+dialog::backdrop { background: rgba(0,0,0,.25); animation: fondu .3s; }
+@keyframes fondu { from { opacity: 0; } }
+
+dialog form { padding: 8px 16px calc(var(--bas) + 24px); display: flex; flex-direction: column; gap: 22px; }
+.poignee { width: 36px; height: 5px; border-radius: 3px; background: rgba(120,120,128,.35); margin: 0 auto; }
+.entete-feuille { display: flex; align-items: center; justify-content: space-between; margin: -6px 0 -6px; }
+.entete-feuille strong { font-size: 17px; }
+.btn-texte { border: none; background: none; color: var(--accent); font: inherit; font-size: 17px; padding: 8px 4px; }
+.btn-texte.fort { font-weight: 600; }
+
+.groupe { background: var(--rangee); border-radius: 14px; overflow: hidden; }
+@media (prefers-color-scheme: light) { .groupe { background: #fff; } }
+@media (prefers-color-scheme: dark) { dialog.feuille { background: #1c1c1e; } .groupe { background: #2c2c2e; } }
+
+.groupe input, .groupe textarea, .groupe select {
+  font: inherit; font-size: 17px; color: var(--texte); background: none; border: none; outline: none;
+}
+.champ-titre { width: 100%; padding: 13px 16px; display: block; }
+.groupe textarea { width: 100%; padding: 4px 16px 12px; resize: none; display: block; color: var(--texte); }
+.groupe textarea::placeholder, .champ-titre::placeholder { color: var(--texte-2); }
+.champ-titre + textarea { border-top: 0.5px solid var(--separateur); padding-top: 12px; }
+
+.ligne { display: flex; align-items: center; gap: 12px; padding: 8px 16px; min-height: 50px; position: relative; }
+.ligne + .ligne::before { content: ""; position: absolute; top: 0; left: 58px; right: 0; height: 0.5px; background: var(--separateur); }
+.ico { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: #fff; flex: none; }
+.ico svg { width: 18px; height: 18px; stroke-width: 2.2; }
+.libelle { flex: 1; }
+.ligne input, .ligne select { text-align: right; color: var(--accent); min-width: 0; max-width: 60%; }
+.ligne select { -webkit-appearance: none; appearance: none; direction: rtl; cursor: pointer; }
+
+.btn-supprimer {
+  border: none; color: var(--rouge); font: inherit; font-size: 17px; padding: 14px; width: 100%; cursor: pointer;
+}
