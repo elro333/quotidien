@@ -624,3 +624,61 @@ main { padding-top: calc(var(--haut) + 56px); }
 /* La ligne « À manger » */
 .ligne-manger { background: rgba(52,199,89,.12); margin-top: 8px; }
 .ligne-manger strong { color: var(--vert); }
+
+/* ============================================================
+   Forme › Cycle
+   ============================================================ */
+#segment-forme { margin-bottom: 12px; }
+#forme-cycle[hidden], #forme-activite[hidden], .carte-pilule[hidden] { display: none; }
+.etiquette-cycle { color: #ff2d55 !important; }
+.btn-rouge { background: #ff2d55; box-shadow: 0 6px 18px rgba(255,45,85,.3), inset 0 1px 0 rgba(255,255,255,.35); }
+.btn-vert { background: var(--vert); box-shadow: 0 6px 18px rgba(52,199,89,.3), inset 0 1px 0 rgba(255,255,255,.35); }
+.carte-pilule { margin-top: 12px; padding: 14px 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.carte-pilule .haut-cat { width: 100%; align-items: center; }
+.carte-pilule .petit { margin: 0; }
+.carte-pilule .btn-principal, .carte-pilule .btn-secondaire { width: 100%; margin-top: 6px; }
+.carte-pilule .btn-texte { padding-left: 0; }
+.alerte-pilule { font-size: 13px; color: var(--orange); margin: 4px 0 0; }
+
+/* Les humeurs */
+.zone-humeur { margin-top: 12px; padding: 12px 14px; }
+.titre-humeur { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.rangee-humeurs { display: flex; justify-content: space-between; gap: 4px; }
+.humeur {
+  border: none; background: rgba(120,120,128,.12); font-size: 24px; line-height: 1;
+  width: 42px; height: 42px; border-radius: 50%; padding: 0; cursor: pointer;
+  transition: transform .2s cubic-bezier(.3,1.4,.5,1), background .2s, box-shadow .2s;
+}
+.humeur.choisie { background: rgba(255,149,0,.22); box-shadow: 0 0 0 2px var(--orange); transform: scale(1.12); }
+
+/* Le calendrier */
+.calendrier-cycle { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px 0; padding-bottom: 6px; }
+.entete-cal { text-align: center; font-size: 12px; font-weight: 600; color: var(--texte-2); padding: 4px 0 6px; }
+.case-cal { border: none; background: none; padding: 2px 0; display: flex; flex-direction: column; align-items: center; gap: 1px; cursor: pointer; color: var(--texte); font: inherit; }
+.num-cal {
+  width: 32px; height: 32px; border-radius: 50%; display: inline-grid; place-items: center;
+  font-size: 15px; font-variant-numeric: tabular-nums;
+}
+.num-cal.regles { background: #ff2d55; color: #fff; font-weight: 600; }
+.num-cal.regles.leger { background: rgba(255,45,85,.55); }
+.num-cal.regles.abondant { background: #d70015; }
+.num-cal.prevues { box-shadow: inset 0 0 0 1.5px rgba(255,45,85,.7); border: none; outline: 1.5px dashed rgba(255,45,85,.7); outline-offset: -1.5px; box-shadow: none; color: #ff2d55; }
+.case-cal.auj .num-cal:not(.regles) { font-weight: 700; color: var(--accent); }
+.case-cal.auj .num-cal { box-shadow: 0 0 0 2px var(--accent); }
+.marques-cal { height: 14px; font-size: 11px; line-height: 14px; display: flex; gap: 2px; align-items: center; }
+.point-pilule { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--vert); }
+.coeur { color: #ff2d55; font-size: 11px; }
+.legende-cal { font-size: 12px; color: var(--texte-2); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 4px 0 10px; }
+.legende-cal .num-cal { width: 18px; height: 18px; font-size: 10px; }
+
+/* ============================================================
+   Bonjour + phrase du jour
+   ============================================================ */
+.phrase-du-jour { margin: 0 4px 12px; font-size: 15px; font-style: italic; color: var(--texte-2); line-height: 1.35; }
+.phrase-du-jour:empty { display: none; }
+/* « Bonne nuit Prénom » tient sur une ligne, à côté du + et du … */
+.grand-titre > div:first-child { min-width: 0; }
+.grand-titre h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grand-titre h1.titre-salut { font-size: 28px; }
+#form-pilule select { direction: ltr; text-align: right; text-align-last: right; }
+.humeur, .marques-cal, .grand-emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif; }

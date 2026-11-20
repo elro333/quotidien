@@ -38,7 +38,16 @@ const CLE_FORME = "quotidien.forme.v1";
 const formeVide = () => ({
   pas: {}, seances: [], poids: [],
   objectifs: { pas: 8000, minutes: 30, poids: null },
-  profil: { taille: null, naissance: null, sexe: "f", rythme: "normal" },
+  profil: { taille: null, naissance: null, sexe: "f", rythme: "normal", prenom: "" },
+  // Le cycle (géré par cycle.js) :
+  //   jours:   { "2026-11-21": { regles: "leger"|"moyen"|"abondant", pilule: true,
+  //                              humeur: "🙂", rapport: true, protege: true, note } }
+  //   pilule:  { active, nom, type: "21-7"|"24-4"|"28"|"continue", debut, heure,
+  //              historique: [ { action: "debut"|"arret", date, nom } ] }
+  cycle: {
+    jours: {},
+    pilule: { active: false, nom: "", type: "21-7", debut: null, heure: "21:00", historique: [] },
+  },
 });
 let forme = chargerForme();
 
@@ -59,6 +68,10 @@ function normaliserForme(f) {
     poids: f?.poids || vide.poids,
     objectifs: { ...vide.objectifs, ...(f?.objectifs || {}) },
     profil: { ...vide.profil, ...(f?.profil || {}) },
+    cycle: {
+      jours: f?.cycle?.jours || {},
+      pilule: { ...vide.cycle.pilule, ...(f?.cycle?.pilule || {}) },
+    },
   };
 }
 function enregistrerForme() {

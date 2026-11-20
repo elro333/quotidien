@@ -66,6 +66,8 @@
 
     <!-- ===== AUJOURD'HUI : le récap de chaque onglet (bouton en haut) ===== -->
     <section id="vue-aujourdhui" class="vue active">
+      <!-- La phrase du jour (accueil.js) -->
+      <p id="phrase-du-jour" class="phrase-du-jour"></p>
       <div id="carte-focus" class="verre focus"></div>
 
       <button class="titre-lien" data-aller="agenda"><h2>Agenda du jour</h2><span>›</span></button>
@@ -77,6 +79,10 @@
         <!-- Récap des pas et du sport, rempli par forme.js -->
         <button id="mini-forme" class="verre tuile"></button>
       </div>
+
+      <!-- La pilule du jour et l'humeur (cycle.js) -->
+      <div id="mini-pilule" class="verre bloc carte-pilule" hidden></div>
+      <div id="humeur-jour" class="verre bloc zone-humeur"></div>
     </section>
 
     <!-- ===== Onglet 2 : AGENDA, vue « Liste » ===== -->
@@ -136,6 +142,41 @@
 
     <!-- ===== Onglet 4 : FORME (tout est dessiné par forme.js) ===== -->
     <section id="vue-forme" class="vue">
+      <div class="segment" id="segment-forme">
+        <button data-sous="activite" class="active">Activité</button>
+        <button data-sous="cycle">Cycle</button>
+      </div>
+
+      <!-- Partie « Cycle » : règles, pilule, humeur (dessinée par cycle.js) -->
+      <div id="forme-cycle" hidden>
+        <div id="carte-cycle" class="verre focus carte-cycle"></div>
+        <div id="carte-pilule" class="verre bloc carte-pilule"></div>
+        <div id="humeur-cycle" class="verre bloc zone-humeur"></div>
+
+        <h2>Calendrier</h2>
+        <div class="verre bloc">
+          <div class="nav-semaine nav-mois">
+            <button id="mois-cycle-prec" class="btn-icone" aria-label="Mois précédent">
+              <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+            </button>
+            <strong id="titre-mois-cycle"></strong>
+            <button id="mois-cycle-suiv" class="btn-icone" aria-label="Mois suivant">
+              <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <div id="calendrier-cycle" class="calendrier-cycle"></div>
+          <p class="legende-cal"><span class="num-cal regles moyen">1</span> règles <span class="num-cal prevues">1</span> prévues <i class="point-pilule"></i> pilule <span class="coeur">♥</span> rapport</p>
+        </div>
+
+        <details id="historique-pilule" class="faites" hidden>
+          <summary>Historique de la pilule</summary>
+          <ul class="liste verre"></ul>
+        </details>
+        <p class="aide aide-groupe">Les dates prévues sont des estimations : elles ne remplacent pas une contraception ni l'avis d'un médecin.</p>
+      </div>
+
+      <!-- Partie « Activité » : pas, sport, poids (dessinée par forme.js) -->
+      <div id="forme-activite">
       <div id="carte-activite" class="verre focus"></div>
 
       <h2>7 derniers jours</h2>
@@ -152,6 +193,7 @@
           <span class="ico" style="background:#ff2d55"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8"/></svg></span>
           <span class="libelle">Moi et mes objectifs</span>
         </button>
+      </div>
       </div>
     </section>
   </main>
@@ -398,6 +440,89 @@
     </form>
   </dialog>
 
+  <!-- Feuille : un jour du cycle -->
+  <dialog id="fenetre-jour-cycle" class="feuille">
+    <form id="form-jour-cycle" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong id="titre-jour-cycle">Ce jour-là</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+
+      <div>
+        <h3 class="titre-groupe">Règles</h3>
+        <div class="segment segment-plein" id="choix-flux">
+          <button type="button" data-flux="">Non</button>
+          <button type="button" data-flux="leger">Léger</button>
+          <button type="button" data-flux="moyen">Moyen</button>
+          <button type="button" data-flux="abondant">Abondant</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="titre-groupe">Humeur</h3>
+        <div class="rangee-humeurs" id="choix-humeur"></div>
+      </div>
+
+      <div class="groupe">
+        <label class="ligne" id="ligne-pilule-jour">
+          <span class="ico" style="background:#34c759"><svg viewBox="0 0 24 24"><rect x="3" y="8.5" width="18" height="7" rx="3.5" transform="rotate(-35 12 12)"/><path d="M9.5 8.5l5 7"/></svg></span>
+          <span class="libelle">Pilule prise</span>
+          <input name="pilule" type="checkbox" class="interrupteur">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#ff2d55"><svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10z"/></svg></span>
+          <span class="libelle">Rapport</span>
+          <input name="rapport" type="checkbox" class="interrupteur">
+        </label>
+        <label class="ligne" id="ligne-protege">
+          <span class="ico" style="background:#5856d6"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg></span>
+          <span class="libelle">Protégé</span>
+          <input name="protege" type="checkbox" class="interrupteur">
+        </label>
+      </div>
+
+      <div class="groupe">
+        <textarea name="note" rows="2" placeholder="Note (douleurs, symptômes…)" style="padding-top:12px"></textarea>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Feuille : ma pilule -->
+  <dialog id="fenetre-pilule" class="feuille">
+    <form id="form-pilule" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong>Ma pilule</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div class="groupe">
+        <input name="nom" placeholder="Son nom (ex. : sur la boîte)" autocomplete="off" class="champ-titre">
+      </div>
+      <div class="groupe">
+        <label class="ligne">
+          <span class="ico" style="background:#34c759"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+          <span class="libelle">Type</span>
+          <select name="type"></select>
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#ff3b30"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16"/></svg></span>
+          <span class="libelle">1er comprimé</span>
+          <input name="debut" type="date" required>
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#007aff"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg></span>
+          <span class="libelle">Heure de prise</span>
+          <input name="heure" type="time">
+        </label>
+      </div>
+      <p class="aide aide-groupe" id="aide-debut"></p>
+      <button type="button" id="arret-pilule" class="groupe btn-supprimer">J'arrête la pilule</button>
+    </form>
+  </dialog>
+
   <!-- Feuille : réglages et sauvegarde -->
   <dialog id="fenetre-reglages" class="feuille">
     <form method="dialog">
@@ -406,6 +531,17 @@
         <span></span>
         <strong>Réglages</strong>
         <button class="btn-texte fort">OK</button>
+      </div>
+
+      <div>
+        <h3 class="titre-groupe">Toi</h3>
+        <div class="groupe">
+          <label class="ligne">
+            <span class="ico" style="background:#ff9500"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
+            <span class="libelle">Ton prénom</span>
+            <input id="champ-prenom" autocomplete="given-name" placeholder="pour te dire bonjour">
+          </label>
+        </div>
       </div>
 
       <div>
@@ -431,6 +567,8 @@
   <!-- Un fichier par onglet : plus facile à lire et à modifier -->
   <script src="budget.js"></script>
   <script src="forme.js"></script>
+  <script src="cycle.js"></script>
+  <script src="accueil.js"></script>
   <script src="sauvegarde.js"></script>
 </body>
 </html>
