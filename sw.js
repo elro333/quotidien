@@ -2,7 +2,7 @@
 // pour qu'elle s'ouvre sans rÃ©seau.
 // Ã€ chaque nouvelle version de l'appli, on change le numÃ©ro ci-dessous
 // pour que l'iPhone tÃ©lÃ©charge les nouveaux fichiers.
-const VERSION = "quotidien-v11";
+const VERSION = "quotidien-v12";
 const FICHIERS = ["./", "index.html", "style.css", "app.js", "budget.js", "forme.js", "sauvegarde.js", "manifest.json", "icons/icon-180.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {

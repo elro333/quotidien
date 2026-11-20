@@ -387,18 +387,20 @@ function afficherMiniForme() {
   const bouton = document.getElementById("mini-forme");
   const auj = aujourdhui();
   const pas = pasDu(auj), minutes = minutesDu(auj);
-  const dejaUtilise = Object.keys(forme.pas).length || forme.seances.length || forme.poids.length;
-  if (!dejaUtilise) { bouton.hidden = true; return; }
-  bouton.hidden = false;
+  const entete = el("span", "entete-tuile", "Forme ›");
+  entete.style.color = ROSE_PAS;
+  const ligne = el("div", "ligne-tuile");
   const texte = el("div", "texte-mini");
-  texte.append(
-    el("span", "petit", "Forme aujourd'hui"),
-    el("strong", "", `${nombre(pas)} pas · ${minutes} min de sport`),
-  );
-  bouton.replaceChildren(anneaux([
+  const vp = el("strong", "", nombre(pas));
+  vp.style.color = ROSE_PAS;
+  const vs = el("strong", "", `${minutes} min`);
+  vs.style.color = VERT_SPORT;
+  texte.append(vp, el("span", "petit", "pas"), vs, el("span", "petit", "de sport"));
+  ligne.append(anneaux([
     { part: pas / forme.objectifs.pas, couleur: ROSE_PAS },
     { part: minutes / forme.objectifs.minutes, couleur: VERT_SPORT },
   ]), texte);
+  bouton.replaceChildren(entete, ligne);
 }
 document.getElementById("mini-forme").addEventListener("click", () => allerA("forme"));
 

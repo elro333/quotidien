@@ -28,9 +28,14 @@
   <!-- Le fond coloré flou : c'est lui qu'on voit "à travers le verre" -->
   <div class="fond-couleurs" aria-hidden="true"></div>
 
-  <!-- Barre du haut : invisible en haut de page, devient du verre quand on fait défiler -->
+  <!-- Barre du haut : le bouton « Aujourd'hui » (le récap de tout), toujours au centre.
+       Le fond devient du verre quand on fait défiler. -->
   <header class="barre-haut" id="barre-haut">
-    <span id="titre-petit"></span>
+    <span id="titre-petit" hidden></span>
+    <button id="btn-aujourdhui" class="bouton-auj verre-fort active">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+      Aujourd'hui
+    </button>
   </header>
 
   <main>
@@ -59,15 +64,19 @@
       <button data-sous="agenda">Semaine</button>
     </div>
 
-    <!-- ===== Onglet 1 : AUJOURD'HUI ===== -->
+    <!-- ===== AUJOURD'HUI : le récap de chaque onglet (bouton en haut) ===== -->
     <section id="vue-aujourdhui" class="vue active">
       <div id="carte-focus" class="verre focus"></div>
-      <h2>Au programme</h2>
+
+      <button class="titre-lien" data-aller="agenda"><h2>Agenda du jour</h2><span>›</span></button>
       <ul id="liste-aujourdhui" class="liste verre"></ul>
-      <!-- Petit rappel du budget, rempli par budget.js -->
-      <button id="mini-budget" class="verre mini-budget" hidden></button>
-      <!-- Petit rappel des pas et du sport, rempli par forme.js -->
-      <button id="mini-forme" class="verre mini-budget mini-forme" hidden></button>
+
+      <div class="tuiles">
+        <!-- Récap du budget, rempli par budget.js -->
+        <button id="mini-budget" class="verre tuile"></button>
+        <!-- Récap des pas et du sport, rempli par forme.js -->
+        <button id="mini-forme" class="verre tuile"></button>
+      </div>
     </section>
 
     <!-- ===== Onglet 2 : AGENDA, vue « Liste » ===== -->
@@ -151,10 +160,6 @@
   <div class="dock">
     <nav class="onglets verre-fort">
       <span class="pilule" id="pilule" aria-hidden="true"></span>
-      <button data-vue="aujourdhui" class="active">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
-        Aujourd'hui
-      </button>
       <button data-vue="agenda">
         <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
         Agenda

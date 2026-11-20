@@ -148,6 +148,7 @@ function allerA(vue) {
   vueActive = vue;
   if (vue === "taches" || vue === "agenda") sousAgenda = vue;
   boutonsOnglets.forEach((b) => b.classList.toggle("active", b.dataset.vue === ongletDe(vue)));
+  document.getElementById("btn-aujourdhui").classList.toggle("active", vue === "aujourdhui");
   document.querySelectorAll(".vue").forEach((v) => v.classList.toggle("active", v.id === "vue-" + vue));
   document.querySelectorAll("#segment-agenda button").forEach((b) => b.classList.toggle("active", b.dataset.sous === vue));
   document.getElementById("segment-agenda").hidden = ongletDe(vue) !== "agenda";
@@ -157,6 +158,12 @@ function allerA(vue) {
 
 document.querySelectorAll("#segment-agenda button").forEach((b) =>
   b.addEventListener("click", () => allerA(b.dataset.sous))
+);
+
+// Le bouton du haut ramène au récap ; les titres du récap mènent à leur onglet
+document.getElementById("btn-aujourdhui").addEventListener("click", () => allerA("aujourdhui"));
+document.querySelectorAll("[data-aller]").forEach((b) =>
+  b.addEventListener("click", () => allerA(b.dataset.aller))
 );
 
 // Glisser le doigt sur la barre, comme sur iOS 26 :
@@ -322,7 +329,14 @@ function afficherAujourdhui() {
   }
 
   const duJour = taches.filter((t) => t.date === auj).sort(trier);
-  remplir(document.getElementById("liste-aujourdhui"), duJour, { montrerDate: false });
+  const ul = document.getElementById("liste-aujourdhui");
+  remplir(ul, duJour, { montrerDate: false });
+  if (!duJour.length) {
+    const li = document.createElement("li");
+    li.className = "vide-msg";
+    li.textContent = "Rien de prévu aujourd'hui.";
+    ul.append(li);
+  }
 }
 
 // ---------- 7. Onglet TÂCHES ----------
@@ -586,7 +600,9 @@ function afficher() {
 // La pilule de verre glisse sous l'onglet choisi
 function placerPilule() {
   const actif = document.querySelector(".onglets button.active");
-  pilule.style.transform = `translateX(${actif.offsetLeft}px)`;
+  // Sur Aujourd'hui, aucun onglet du bas n'est choisi : la pilule se cache
+  pilule.classList.toggle("cachee", !actif);
+  if (actif) pilule.style.transform = `translateX(${actif.offsetLeft}px)`;
 }
 
 // La barre du haut devient du verre dès qu'on fait défiler

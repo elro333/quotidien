@@ -573,3 +573,39 @@ dialog form { padding: 8px 16px calc(var(--bas) + 24px); display: flex; flex-dir
 .btn-ajouter { color: #fff !important; background: var(--accent) !important;
   box-shadow: 0 6px 16px rgba(0,122,255,.35), inset 0 1px 0 rgba(255,255,255,.4) !important; }
 .ligne-kcal .petit { display: block; margin-top: 2px; }
+
+/* ============================================================
+   Le bouton « Aujourd'hui » en haut au centre, et la page récap
+   ============================================================ */
+.barre-haut { pointer-events: none; }
+.bouton-auj {
+  pointer-events: auto; border: none; font: inherit; font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px 0 12px; border-radius: 999px;
+  color: var(--texte); cursor: pointer; transition: color .25s, transform .2s;
+}
+.bouton-auj svg { width: 19px; height: 19px; stroke-width: 2; }
+.bouton-auj.active { color: var(--accent); }
+.bouton-auj:active { transform: scale(.94); }
+/* Le contenu commence un peu plus bas pour laisser respirer le bouton */
+main { padding-top: calc(var(--haut) + 56px); }
+
+/* Pas d'onglet du bas choisi (on est sur Aujourd'hui) : pilule cachée */
+.pilule.cachee { opacity: 0; }
+
+/* Un titre de section qui mène à un onglet : « Agenda du jour › » */
+.titre-lien { display: flex; align-items: baseline; gap: 6px; border: none; background: none; padding: 0; color: var(--texte); font: inherit; cursor: pointer; }
+.titre-lien span { font-size: 22px; font-weight: 600; color: var(--texte-2); }
+
+/* Les tuiles Budget et Forme, côte à côte comme dans l'app Santé */
+.tuiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+.tuile {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0;
+  border-radius: 22px; padding: 14px; color: var(--texte); font: inherit; text-align: left; cursor: pointer;
+}
+.entete-tuile { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.chiffre-tuile { font-size: 24px; font-weight: 700; letter-spacing: -.3px; font-variant-numeric: tabular-nums; }
+.ligne-tuile { display: flex; align-items: center; gap: 10px; }
+.ligne-tuile .anneaux { width: 58px; height: 58px; }
+.texte-mini { display: grid; line-height: 1.15; }
+.texte-mini strong { font-size: 18px; }
+.texte-mini .petit { font-size: 12px; margin-bottom: 3px; }

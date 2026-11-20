@@ -272,11 +272,17 @@ function afficherMiniBudget() {
   creerMensuels();
   const bouton = document.getElementById("mini-budget");
   const { reste, revenus, depenses } = totauxDuMois(moisActuel());
-  if (!revenus && !depenses) { bouton.hidden = true; return; }
-  bouton.hidden = false;
+  const entete = el("span", "entete-tuile", "Budget ›");
+  entete.style.color = "var(--vert)";
+  if (!revenus && !depenses) {
+    bouton.replaceChildren(entete, el("span", "petit", "Rien de noté ce mois-ci."));
+    return;
+  }
   bouton.replaceChildren(
-    el("span", "petit", "Budget du mois"),
-    el("strong", reste >= 0 ? "positif" : "negatif", (reste >= 0 ? "Il te reste " : "Dans le rouge : ") + euros(reste)),
+    entete,
+    el("span", "petit", reste >= 0 ? "Il te reste" : "Dans le rouge"),
+    el("strong", "chiffre-tuile " + (reste >= 0 ? "positif" : "negatif"), euros(reste)),
+    el("span", "petit", `${euros(depenses)} dépensés`),
   );
 }
 document.getElementById("mini-budget").addEventListener("click", () => allerA("budget"));
