@@ -61,7 +61,7 @@ body { min-height: 100vh; min-height: 100lvh; }
 
 body {
   margin: 0;
-  background: var(--fond);
+  background: transparent;   /* transparent : sinon il cacherait le fond coloré */
   color: var(--texte);
   font-family: var(--police);
   font-size: 17px;               /* taille de texte standard d'iOS */
@@ -74,14 +74,30 @@ body {
 
 svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-/* ---------- Le fond coloré (trois taches floues) ---------- */
-.fond-couleurs { position: fixed; top: 0; left: 0; right: 0; height: 100lvh; z-index: -1; overflow: hidden; }
-.fond-couleurs i { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55; }
-.fond-couleurs i:nth-child(1) { width: 70vw; height: 70vw; background: #7fb2ff; top: -20vw; left: -15vw; }
-.fond-couleurs i:nth-child(2) { width: 60vw; height: 60vw; background: #ffb3c7; top: 30vh; right: -25vw; }
-.fond-couleurs i:nth-child(3) { width: 65vw; height: 65vw; background: #ffd59a; bottom: -20vw; left: 5vw; opacity: .45; }
+/* ---------- Le fond coloré (trois taches floues) ----------
+   Dessiné avec des dégradés radiaux plutôt qu'avec filter: blur() :
+   l'iPhone abandonne parfois les gros flous pour économiser sa mémoire,
+   alors que les dégradés s'affichent toujours. Il dépasse un peu de
+   l'écran en haut et en bas pour couvrir aussi les zones de l'encoche
+   et de la barre d'accueil. */
+:root {
+  --tache-1: rgba(110, 165, 255, .7);
+  --tache-2: rgba(255, 160, 190, .65);
+  --tache-3: rgba(255, 200, 120, .6);
+}
 @media (prefers-color-scheme: dark) {
-  .fond-couleurs i { opacity: .28; }
+  :root {
+    --tache-1: rgba(60, 110, 230, .35);
+    --tache-2: rgba(200, 80, 130, .25);
+    --tache-3: rgba(220, 150, 60, .2);
+  }
+}
+.fond-couleurs {
+  position: fixed; left: 0; right: 0; top: -20vh; bottom: -20vh; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60vmax 60vmax at 5% 15%, var(--tache-1), transparent 60%),
+    radial-gradient(55vmax 55vmax at 105% 55%, var(--tache-2), transparent 60%),
+    radial-gradient(60vmax 60vmax at 30% 100%, var(--tache-3), transparent 60%);
 }
 
 /* ---------- Les surfaces en verre ---------- */
