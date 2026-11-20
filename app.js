@@ -134,14 +134,68 @@ function trier(a, b) {
 const TITRES = { aujourdhui: "Aujourd'hui", taches: "Tâches", agenda: "Agenda" };
 let vueActive = "aujourdhui";
 
-document.querySelectorAll(".onglets button").forEach((bouton) => {
-  bouton.addEventListener("click", () => {
-    vueActive = bouton.dataset.vue;
-    document.querySelectorAll(".onglets button").forEach((b) => b.classList.toggle("active", b === bouton));
-    document.querySelectorAll(".vue").forEach((v) => v.classList.toggle("active", v.id === "vue-" + vueActive));
-    afficher();
-  });
+const barreOnglets = document.querySelector(".onglets");
+const boutonsOnglets = [...barreOnglets.querySelectorAll("button")];
+const pilule = document.getElementById("pilule");
+
+function allerA(vue) {
+  if (vue === vueActive) { placerPilule(); return; }
+  vueActive = vue;
+  boutonsOnglets.forEach((b) => b.classList.toggle("active", b.dataset.vue === vue));
+  document.querySelectorAll(".vue").forEach((v) => v.classList.toggle("active", v.id === "vue-" + vue));
+  window.scrollTo(0, 0);
+  afficher();
+}
+
+// Glisser le doigt sur la barre, comme sur iOS 26 :
+// la pilule suit le doigt, grossit un peu, et se pose sur
+// l'onglet le plus proche quand on lâche.
+let glisse = null; // { debutX, bouge }
+
+function ongletSous(x) {
+  // l'onglet dont le centre est le plus proche du doigt
+  return boutonsOnglets.reduce((meilleur, b) => {
+    const r = b.getBoundingClientRect();
+    const d = Math.abs(r.left + r.width / 2 - x);
+    return d < meilleur.d ? { b, d } : meilleur;
+  }, { b: boutonsOnglets[0], d: Infinity }).b;
+}
+
+function suivreDoigt(x) {
+  const nav = barreOnglets.getBoundingClientRect();
+  const largeur = pilule.offsetWidth;
+  const pos = Math.max(4, Math.min(x - nav.left - largeur / 2, nav.width - largeur - 4));
+  pilule.style.transform = `translateX(${pos}px) scale(1.12)`;
+  const sous = ongletSous(x);
+  boutonsOnglets.forEach((b) => b.classList.toggle("survol", b === sous));
+}
+
+barreOnglets.addEventListener("pointerdown", (e) => {
+  glisse = { debutX: e.clientX, bouge: false };
+  barreOnglets.setPointerCapture(e.pointerId);
+  barreOnglets.classList.add("glisse");
+  suivreDoigt(e.clientX);
 });
+barreOnglets.addEventListener("pointermove", (e) => {
+  if (!glisse) return;
+  if (Math.abs(e.clientX - glisse.debutX) > 4) glisse.bouge = true;
+  suivreDoigt(e.clientX);
+});
+function lacher(e) {
+  if (!glisse) return;
+  glisse = null;
+  barreOnglets.classList.remove("glisse");
+  boutonsOnglets.forEach((b) => b.classList.remove("survol"));
+  allerA(ongletSous(e.clientX).dataset.vue);
+  placerPilule();
+}
+barreOnglets.addEventListener("pointerup", lacher);
+barreOnglets.addEventListener("pointercancel", lacher);
+
+// Au clavier (Entrée / Espace), les onglets restent des boutons normaux
+boutonsOnglets.forEach((b) =>
+  b.addEventListener("click", (e) => { if (e.detail === 0) allerA(b.dataset.vue); })
+);
 
 // ---------- 5. Fabriquer une ligne de tâche ----------
 // On construit les éléments un par un (plutôt que du HTML en texte)
@@ -503,7 +557,7 @@ function afficher() {
 // La pilule de verre glisse sous l'onglet choisi
 function placerPilule() {
   const actif = document.querySelector(".onglets button.active");
-  document.getElementById("pilule").style.transform = `translateX(${actif.offsetLeft}px)`;
+  pilule.style.transform = `translateX(${actif.offsetLeft}px)`;
 }
 
 // La barre du haut devient du verre dès qu'on fait défiler

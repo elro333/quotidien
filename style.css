@@ -288,8 +288,21 @@ details.faites summary::-webkit-details-marker { display: none; }
   position: absolute; top: 4px; bottom: 4px; left: 0; width: 88px; border-radius: 999px;
   background: rgba(120,120,128,.16);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
-  transition: transform .45s cubic-bezier(.3,1.4,.5,1);
+  transition: transform .45s cubic-bezier(.3,1.4,.5,1), background .2s, box-shadow .2s;
 }
+/* Pendant qu'on glisse : pas de barre qui défile, la pilule suit le doigt
+   sans retard et devient une goutte de verre plus brillante. */
+.onglets { touch-action: none; -webkit-user-select: none; user-select: none; }
+.onglets.glisse .pilule {
+  transition: transform .08s linear, background .2s, box-shadow .2s;
+  background: rgba(255,255,255,.35);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.9), inset 0 0 10px rgba(255,255,255,.4), 0 6px 18px rgba(0,0,0,.15);
+}
+@media (prefers-color-scheme: dark) {
+  .onglets.glisse .pilule { background: rgba(255,255,255,.16); box-shadow: inset 0 1px 1px rgba(255,255,255,.35), 0 6px 18px rgba(0,0,0,.4); }
+}
+.onglets.glisse button.active { color: var(--texte); }
+.onglets.glisse button.survol { color: var(--accent); }
 
 .btn-plus {
   width: 62px; height: 62px; border-radius: 50%; border: none; flex: none;
