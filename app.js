@@ -265,9 +265,155 @@ function ligneTache(t, { montrerDate = true, projection = false } = {}) {
   pastille.className = "pastille";
   pastille.style.background = CATEGORIES[t.cat]?.couleur || "var(--doux)";
 
-  li.append(caseBtn, infos, pastille);
+  if (projection) {
+    li.append(caseBtn, infos, pastille);
+    return li;
+  }
+
+  // La ligne peut glisser : on met son contenu dans une « plaque »
+  // qui bouge, et derrière, les deux actions (vert à gauche, rouge à droite).
+  li.classList.add("glissable");
+  const plaque = document.createElement("div");
+  plaque.className = "plaque";
+  plaque.append(caseBtn, infos, pastille);
+  const actionFait = document.createElement("div");
+  actionFait.className = "action-glisse action-fait";
+  actionFait.textContent = t.fait ? "↺ À faire" : "✓ Fait";
+  const actionSuppr = document.createElement("div");
+  actionSuppr.className = "action-glisse action-suppr";
+  actionSuppr.textContent = "🗑 Supprimer";
+  li.append(actionFait, actionSuppr, plaque);
+  rendreGlissable(li, plaque, {
+    droite: () => basculer(t.id),
+    gauche: () => mettreALaCorbeille(t.id),
+  });
   return li;
 }
+
+// ---------- 5 bis. Glisser une ligne, comme dans Rappels ----------
+// Vers la droite → fait (vert). Vers la gauche → corbeille (rouge).
+// On ne glisse que si le doigt part de côté : vers le haut ou le bas,
+// la page défile normalement.
+let vientDeGlisser = false;
+
+function rendreGlissable(li, plaque, { droite, gauche }) {
+  let depart = null; // { x, y, sens: null | "cote" | "vertical" }
+  let dx = 0;
+
+  plaque.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    depart = { x: e.clientX, y: e.clientY, sens: null };
+    dx = 0;
+  });
+  plaque.addEventListener("pointermove", (e) => {
+    if (!depart) return;
+    const mx = e.clientX - depart.x, my = e.clientY - depart.y;
+    if (!depart.sens) {
+      if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
+      depart.sens = Math.abs(mx) > Math.abs(my) ? "cote" : "vertical";
+      if (depart.sens === "cote") { plaque.setPointerCapture(e.pointerId); li.classList.add("en-glisse"); }
+    }
+    if (depart.sens !== "cote") return;
+    dx = mx;
+    plaque.style.transform = `translateX(${dx}px)`;
+    const seuil = Math.min(110, li.offsetWidth * 0.35);
+    li.classList.toggle("vers-droite", dx > 0);
+    li.classList.toggle("vers-gauche", dx < 0);
+    li.classList.toggle("assez", Math.abs(dx) > seuil);
+  });
+
+  function finir() {
+    if (!depart) return;
+    const glissait = depart.sens === "cote";
+    depart = null;
+    li.classList.remove("en-glisse");
+    if (!glissait) return;
+    vientDeGlisser = true;
+    setTimeout(() => (vientDeGlisser = false), 50);
+    const seuil = Math.min(110, li.offsetWidth * 0.35);
+    if (Math.abs(dx) > seuil) {
+      // La ligne file hors de l'écran, puis l'action se fait
+      plaque.style.transform = `translateX(${dx > 0 ? li.offsetWidth : -li.offsetWidth}px)`;
+      li.classList.add("part");
+      setTimeout(() => (dx > 0 ? droite() : gauche()), 220);
+    } else {
+      plaque.style.transform = "";
+      li.classList.remove("vers-droite", "vers-gauche", "assez");
+    }
+  }
+  plaque.addEventListener("pointerup", finir);
+  plaque.addEventListener("pointercancel", finir);
+  // Après un glissement, le « clic » de fin ne doit pas ouvrir la tâche
+  plaque.addEventListener("click", (e) => { if (vientDeGlisser) { e.stopPropagation(); e.preventDefault(); } }, true);
+}
+
+// ---------- 5 ter. La corbeille ----------
+// Une tâche supprimée n'est pas perdue : elle va dans « Supprimées »
+// (gardée 30 jours), d'où on peut la restaurer.
+const CLE_CORBEILLE = "quotidien.corbeille.v1";
+let corbeille = (() => {
+  try { return JSON.parse(localStorage.getItem(CLE_CORBEILLE)) || []; } catch (e) { return []; }
+})();
+function enregistrerCorbeille() {
+  // On oublie ce qui est dans la corbeille depuis plus de 30 jours
+  const limite = Date.now() - 30 * 86400000;
+  corbeille = corbeille.filter((t) => (t.supprimeeLe || 0) > limite);
+  try { localStorage.setItem(CLE_CORBEILLE, JSON.stringify(corbeille)); } catch (e) {}
+}
+
+function mettreALaCorbeille(id) {
+  const t = taches.find((x) => x.id === id);
+  if (!t) return;
+  taches = taches.filter((x) => x.id !== id);
+  corbeille.unshift({ ...t, supprimeeLe: Date.now() });
+  enregistrer();
+  enregistrerCorbeille();
+  afficher();
+  if (typeof montrerToast === "function") montrerToast("Supprimée", () => restaurerTache(t.id), "Annuler");
+}
+
+function restaurerTache(id) {
+  const t = corbeille.find((x) => x.id === id);
+  if (!t) return;
+  corbeille = corbeille.filter((x) => x.id !== id);
+  const { supprimeeLe, ...tache } = t;
+  taches.push(tache);
+  enregistrer();
+  enregistrerCorbeille();
+  afficher();
+}
+
+function afficherCorbeille() {
+  const zone = document.getElementById("corbeille");
+  document.getElementById("resume-corbeille").textContent = `Supprimées · ${corbeille.length}`;
+  zone.hidden = !corbeille.length;
+  const ul = document.getElementById("liste-corbeille");
+  ul.replaceChildren(...corbeille.map((t) => {
+    const li = document.createElement("li");
+    const infos = document.createElement("div");
+    infos.className = "infos";
+    const titre = document.createElement("div");
+    titre.className = "t";
+    titre.textContent = t.titre;
+    const meta = document.createElement("div");
+    meta.className = "m";
+    const d = new Date(t.supprimeeLe);
+    meta.textContent = `Supprimée le ${d.getDate()} ${MOIS[d.getMonth()]}`;
+    infos.append(titre, meta);
+    const b = document.createElement("button");
+    b.className = "btn-texte";
+    b.textContent = "Restaurer";
+    b.addEventListener("click", () => restaurerTache(t.id));
+    li.append(infos, b);
+    return li;
+  }));
+}
+document.getElementById("vider-corbeille").addEventListener("click", () => {
+  if (!confirm(`Supprimer définitivement ${corbeille.length} tâche(s) ? Ce n'est pas réversible.`)) return;
+  corbeille = [];
+  enregistrerCorbeille();
+  afficher();
+});
 
 function remplir(ul, liste, options) {
   ul.replaceChildren(...liste.map((t) => ligneTache(t, options)));
@@ -409,6 +555,7 @@ function afficherTaches() {
   const faites = visibles.filter((t) => t.fait);
   document.getElementById("resume-faites").textContent = `Faites · ${faites.length}`;
   remplir(document.getElementById("liste-faites"), faites.reverse());
+  afficherCorbeille();
 }
 
 // ---------- 8. Onglet AGENDA ----------
@@ -565,11 +712,9 @@ formulaire.addEventListener("submit", () => {
 });
 
 document.getElementById("btn-supprimer").addEventListener("click", () => {
-  if (!enEdition || !confirm("Supprimer cette tâche ?")) return;
-  taches = taches.filter((t) => t.id !== enEdition.id);
-  enregistrer();
+  if (!enEdition) return;
   fenetre.close();
-  afficher();
+  mettreALaCorbeille(enEdition.id); // pas de question : elle reste dans « Supprimées »
 });
 
 function basculer(id) {

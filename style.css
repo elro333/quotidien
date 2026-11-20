@@ -702,3 +702,29 @@ main { padding-top: calc(var(--haut) + 56px); }
 }
 .toast.visible { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 .toast .btn-texte { padding: 0; font-size: 15px; }
+
+/* ============================================================
+   Glisser une tâche (droite = fait, gauche = supprimer)
+   ============================================================ */
+.liste li.glissable { padding: 0; display: block; overflow: hidden; touch-action: pan-y; }
+.liste li.glissable .plaque {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px; position: relative; z-index: 1;
+  transition: transform .3s cubic-bezier(.2,.8,.2,1);
+  -webkit-user-select: none; user-select: none;
+}
+.liste li.glissable.en-glisse .plaque { transition: none; }
+.action-glisse {
+  position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 20px;
+  color: #fff; font-weight: 600; font-size: 15px; opacity: 0; transition: opacity .15s, filter .15s;
+}
+.action-fait { left: 0; right: 0; background: var(--vert); justify-content: flex-start; }
+.action-suppr { left: 0; right: 0; background: var(--rouge); justify-content: flex-end; }
+li.vers-droite .action-fait, li.vers-gauche .action-suppr { opacity: .55; }
+li.vers-droite.assez .action-fait, li.vers-gauche.assez .action-suppr { opacity: 1; }
+li.part { transition: opacity .2s .1s; opacity: .4; }
+/* La plaque reste lisible pendant qu'elle glisse sur la couleur */
+li.en-glisse .plaque, li.part .plaque { background: #fff; }
+@media (prefers-color-scheme: dark) { li.en-glisse .plaque, li.part .plaque { background: #1c1c1e; } }
+.vider-corbeille { color: var(--rouge); margin: 8px 4px 0; font-size: 15px; }
+#corbeille[hidden] { display: none; }
+#liste-corbeille li .btn-texte { flex: none; }

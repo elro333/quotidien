@@ -26,6 +26,7 @@ function contenuSauvegarde() {
     taches,
     budget,
     forme,
+    corbeille,
   };
 }
 
@@ -82,6 +83,8 @@ function restaurer(fichier) {
     enregistrer();
     enregistrerBudget();
     enregistrerForme();
+    corbeille = Array.isArray(donnees.corbeille) ? donnees.corbeille : [];
+    enregistrerCorbeille();
     fenReglages.close();
     afficher();
     alert("C'est restauré ✓");

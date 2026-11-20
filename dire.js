@@ -327,10 +327,10 @@ document.getElementById("form-dire").addEventListener("submit", (e) => {
 // ---------- 5. Le petit message « Ajouté ✓ — Modifier » ----------
 const toast = document.getElementById("toast");
 let minuteurToast = null;
-function montrerToast(texte, quandModifier) {
+function montrerToast(texte, quandModifier, libelle = "Modifier") {
   toast.replaceChildren(el("span", "", texte));
   if (quandModifier) {
-    const b = el("button", "btn-texte", "Modifier");
+    const b = el("button", "btn-texte", libelle);
     b.addEventListener("click", () => { toast.classList.remove("visible"); quandModifier(); });
     toast.append(b);
   }
