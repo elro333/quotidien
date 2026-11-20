@@ -56,8 +56,13 @@
 * { box-sizing: border-box; }
 /* Plein écran sur iPhone : la page et son fond couvrent TOUT l'écran,
    y compris sous l'heure en haut et sous la barre d'accueil en bas. */
-html { -webkit-text-size-adjust: 100%; background: var(--fond); min-height: 100%; }
+html {
+  -webkit-text-size-adjust: 100%; background: var(--fond); min-height: 100%;
+  touch-action: pan-x pan-y;      /* on peut faire défiler, mais pas zoomer */
+}
 body { min-height: 100vh; min-height: 100lvh; }
+/* Pas de zoom par double-tap sur les boutons */
+button, input, select, textarea, label { touch-action: manipulation; }
 
 body {
   margin: 0;
@@ -87,13 +92,16 @@ svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width:
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --tache-1: rgba(60, 110, 230, .35);
-    --tache-2: rgba(200, 80, 130, .25);
-    --tache-3: rgba(220, 150, 60, .2);
+    --tache-1: rgba(70, 120, 255, .55);
+    --tache-2: rgba(220, 70, 150, .42);
+    --tache-3: rgba(255, 150, 50, .32);
   }
 }
+/* z-index: 0 (et pas -1) : sur iPhone, un calque en -1 peut passer
+   DERRIÈRE le fond noir de la page → écran tout noir. Le contenu,
+   lui, est remonté au-dessus avec z-index: 1 (voir main). */
 .fond-couleurs {
-  position: fixed; left: 0; right: 0; top: -20vh; bottom: -20vh; z-index: -1; pointer-events: none;
+  position: fixed; left: 0; right: 0; top: -20vh; bottom: -20vh; z-index: 0; pointer-events: none;
   background:
     radial-gradient(60vmax 60vmax at 5% 15%, var(--tache-1), transparent 60%),
     radial-gradient(55vmax 55vmax at 105% 55%, var(--tache-2), transparent 60%),
@@ -109,11 +117,31 @@ svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width:
   border: 0.5px solid var(--bord-verre);
   box-shadow: inset 0 1px 0 var(--reflet), var(--ombre);
 }
+/* Le verre « liquide » de la barre du bas : moins flou (on devine ce qui
+   passe dessous), un dégradé de lumière, un bord brillant et un éclat
+   intérieur, comme une goutte de verre posée sur l'écran. */
 .verre-fort {
-  background: var(--verre-fort);
-  -webkit-backdrop-filter: blur(20px) saturate(200%) brightness(1.05);
-  backdrop-filter: blur(20px) saturate(200%) brightness(1.05);
-  box-shadow: inset 0 1px 1px var(--reflet), inset 0 -1px 1px rgba(255,255,255,.12), 0 12px 40px rgba(0,0,0,.14);
+  background: linear-gradient(160deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.18) 45%, rgba(255,255,255,.32) 100%);
+  -webkit-backdrop-filter: blur(10px) saturate(210%) contrast(1.05);
+  backdrop-filter: blur(10px) saturate(210%) contrast(1.05);
+  border: 1px solid rgba(255,255,255,.7);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255,255,255,.95),
+    inset 0 -1.5px 2px rgba(255,255,255,.35),
+    inset 0 0 18px rgba(255,255,255,.28),
+    0 14px 34px rgba(0,0,0,.16),
+    0 2px 6px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme: dark) {
+  .verre-fort {
+    background: linear-gradient(160deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 45%, rgba(255,255,255,.12) 100%);
+    border-color: rgba(255,255,255,.22);
+    box-shadow:
+      inset 0 1.5px 1px rgba(255,255,255,.35),
+      inset 0 -1px 2px rgba(255,255,255,.1),
+      inset 0 0 18px rgba(255,255,255,.08),
+      0 14px 34px rgba(0,0,0,.5);
+  }
 }
 
 /* ---------- Barre du haut ---------- */
@@ -133,7 +161,7 @@ svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width:
 }
 .barre-haut.defile span { opacity: 1; }
 
-main { padding: calc(var(--haut) + 44px) 16px calc(var(--bas) + 130px); max-width: 640px; margin: 0 auto; }
+main { position: relative; z-index: 1; padding: calc(var(--haut) + 44px) 16px calc(var(--bas) + 130px); max-width: 640px; margin: 0 auto; }
 
 .grand-titre { padding: 6px 4px 8px; }
 .grand-titre h1 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: .3px; }

@@ -510,6 +510,11 @@ function placerPilule() {
 const barreHaut = document.getElementById("barre-haut");
 window.addEventListener("scroll", () => barreHaut.classList.toggle("defile", window.scrollY > 40), { passive: true });
 
+// Pas de zoom à deux doigts (Safari ignore parfois l'interdiction du HTML)
+["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
+  document.addEventListener(ev, (e) => e.preventDefault(), { passive: false })
+);
+
 // Toucher le fond sombre ferme la feuille
 fenetre.addEventListener("click", (e) => { if (e.target === fenetre) fenetre.close(); });
 
