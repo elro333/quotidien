@@ -38,7 +38,7 @@ const CLE_FORME = "quotidien.forme.v1";
 const formeVide = () => ({
   pas: {}, seances: [], poids: [],
   objectifs: { pas: 8000, minutes: 30, poids: null },
-  profil: { taille: null, naissance: null, sexe: "f" },
+  profil: { taille: null, naissance: null, sexe: "f", rythme: "normal" },
 });
 let forme = chargerForme();
 
@@ -125,6 +125,61 @@ function calories(jour) {
   if (!age) return { bouger, total: null };
   const base = 10 * kg + 6.25 * taille - 5 * age + (sexe === "h" ? 5 : -161);
   return { bouger, total: Math.round(base * 1.1 + bouger) };
+}
+
+// Le métabolisme de base seul (ou null s'il manque une info)
+function metabolisme() {
+  const kg = poidsActuel(), age = ageActuel();
+  const { taille, sexe } = forme.profil;
+  if (!kg || !taille || !age) return null;
+  return 10 * kg + 6.25 * taille - 5 * age + (sexe === "h" ? 5 : -161);
+}
+
+// ---------- 3 ter. Combien manger par jour ----------
+// 1 kg de graisse ≈ 7 700 kcal. Perdre 0,5 kg par semaine
+// = manger environ 550 kcal de moins que ce qu'on dépense, chaque jour.
+const RYTHMES = {
+  doux:   { nom: "Doux (−0,25 kg/sem.)",  kgSemaine: 0.25 },
+  normal: { nom: "Normal (−0,5 kg/sem.)", kgSemaine: 0.5 },
+};
+const KCAL_PAR_KG = 7700;
+const PLANCHER = 1200; // jamais moins : en dessous, c'est mauvais pour la santé
+
+function besoinCalories() {
+  const base = metabolisme();
+  if (!base) return null;
+  const kg = poidsActuel();
+
+  // Ce que tu dépenses : métabolisme + digestion + la MOYENNE de tes 7 derniers
+  // jours en bougeant (une moyenne, pour que le chiffre ne saute pas chaque jour)
+  const jours = Array.from({ length: 7 }, (_, i) => ajouterJours(aujourdhui(), -i - 1));
+  const moyenneBouger = jours.reduce((t, j) => t + (calories(j)?.bouger || 0), 0) / 7;
+  const depense = base * 1.1 + moyenneBouger;
+
+  const vise = forme.objectifs.poids;
+  const aPerdre = vise ? kg - vise : 0;
+  if (aPerdre <= 0.2) {
+    return { mode: "maintien", manger: Math.round(depense / 10) * 10 };
+  }
+
+  const rythme = RYTHMES[forme.profil.rythme] || RYTHMES.normal;
+  const deficitVise = rythme.kgSemaine * KCAL_PAR_KG / 7;
+  const plancher = Math.max(base, PLANCHER);
+  const manger = Math.max(depense - deficitVise, plancher);
+  const deficit = depense - manger;
+  if (deficit < 50) return { mode: "bloque", manger: Math.round(manger / 10) * 10 };
+
+  // Quand l'objectif sera atteint, à ce rythme
+  const kgSemaine = deficit * 7 / KCAL_PAR_KG;
+  const fin = new Date();
+  fin.setDate(fin.getDate() + Math.round(aPerdre / kgSemaine * 7));
+  return {
+    mode: "perte",
+    manger: Math.round(manger / 10) * 10,
+    kgSemaine: Math.round(kgSemaine * 100) / 100,
+    fin,
+    limite: manger === plancher, // on a dû remonter au plancher
+  };
 }
 
 // "65,4" → 65.4 ; renvoie null si ce n'est pas un nombre > 0
@@ -227,6 +282,34 @@ function dessinerActivite() {
     ));
   }
   carte.append(ligneKcal);
+
+  // Combien manger par jour (si on connaît assez de choses)
+  const besoin = besoinCalories();
+  if (besoin) {
+    const ligneManger = el("button", "ligne-kcal ligne-manger");
+    const fort = el("strong", "", `≈ ${nombre(besoin.manger)} kcal`);
+    if (besoin.mode === "maintien") {
+      ligneManger.append("🍽 À manger : ", fort, " par jour");
+      ligneManger.append(el("span", "petit", forme.objectifs.poids ? "Poids visé atteint : pour le garder" : "Pour garder ton poids (ajoute un poids visé pour perdre)"));
+    } else if (besoin.mode === "bloque") {
+      ligneManger.append("🍽 À manger : ", fort, " par jour");
+      ligneManger.append(el("span", "petit", "Pas de déficit possible sans manger trop peu : bouge un peu plus 🚶‍♀️"));
+    } else {
+      ligneManger.append("🍽 À manger : ", fort, " par jour");
+      const date = `${besoin.fin.getDate()} ${MOIS[besoin.fin.getMonth()]} ${besoin.fin.getFullYear()}`;
+      ligneManger.append(el("span", "petit",
+        `pour perdre ≈ ${String(besoin.kgSemaine).replace(".", ",")} kg/semaine · ${kgTexte(forme.objectifs.poids)} vers le ${date}` +
+        (besoin.limite ? " · rythme ralenti pour ne pas descendre trop bas" : "")));
+    }
+    ligneManger.addEventListener("click", () => alert(
+      "Comment c'est calculé :\n\n" +
+      "1. Ce que tu dépenses : ton métabolisme (âge, taille, poids) + la moyenne de tes 7 derniers jours (pas et séances).\n" +
+      "2. Pour perdre 1 kg, il faut environ 7 700 kcal de déficit. On retire donc chaque jour la part qui correspond à ton rythme.\n" +
+      "3. Jamais moins que ton métabolisme de base, ni moins de 1 200 kcal.\n\n" +
+      "C'est une estimation, pas un avis médical."
+    ));
+    carte.append(ligneManger);
+  }
 
   const boutons = el("div", "boutons");
   const bPas = el("button", "btn-principal btn-rose", "Noter mes pas");
@@ -514,6 +597,7 @@ function ouvrirObjectifs() {
   formObjectifs.taille.value = forme.profil.taille || "";
   formObjectifs.naissance.value = forme.profil.naissance || "";
   formObjectifs.sexe.value = forme.profil.sexe;
+  formObjectifs.rythme.value = forme.profil.rythme || "normal";
   fenObjectifs.showModal();
 }
 document.getElementById("btn-objectifs").addEventListener("click", ouvrirObjectifs);
@@ -530,6 +614,7 @@ formObjectifs.addEventListener("submit", () => {
     taille: taille && taille > 100 && taille < 250 ? Math.round(taille) : null,   // en cm
     naissance: annee && annee > 1900 && annee <= new Date().getFullYear() ? Math.round(annee) : null,
     sexe: formObjectifs.sexe.value,
+    rythme: formObjectifs.rythme.value,
   };
   enregistrerForme();
   afficher();

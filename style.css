@@ -620,3 +620,7 @@ main { padding-top: calc(var(--haut) + 56px); }
 .focus .etiquette.importante::before { display: none; }
 .bande-jours .points i.important { background: var(--orange); }
 .interrupteur-orange:checked { background: var(--orange) !important; }
+
+/* La ligne « À manger » */
+.ligne-manger { background: rgba(52,199,89,.12); margin-top: 8px; }
+.ligne-manger strong { color: var(--vert); }
