@@ -682,3 +682,23 @@ main { padding-top: calc(var(--haut) + 56px); }
 .grand-titre h1.titre-salut { font-size: 28px; }
 #form-pilule select { direction: ltr; text-align: right; text-align-last: right; }
 .humeur, .marques-cal, .grand-emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif; }
+
+/* ============================================================
+   Dis-le (micro)
+   ============================================================ */
+.actions-haut { gap: 8px; }
+.champ-dire { font-size: 19px !important; padding: 14px 16px !important; }
+.apercu-dire { padding: 6px 14px; }
+.apercu-dire .aide { margin: 10px 0; }
+.apercu-dire strong { display: block; font-size: 17px; margin: 1px 0; overflow-wrap: anywhere; }
+#btn-ajouter-dire:disabled { opacity: .35; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(var(--bas) + 92px); z-index: 30;
+  transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  display: flex; align-items: center; gap: 14px; padding: 10px 18px; border-radius: 999px;
+  font-weight: 600; font-size: 15px; white-space: nowrap;
+  transition: opacity .25s, transform .35s cubic-bezier(.3,1.4,.5,1);
+}
+.toast.visible { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.toast .btn-texte { padding: 0; font-size: 15px; }

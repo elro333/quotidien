@@ -46,6 +46,10 @@
       </div>
       <!-- En haut à droite, comme dans les apps Apple : + (ajouter) et … (réglages) -->
       <div class="actions-haut">
+        <!-- Micro : dire une phrase, l'appli la range (dire.js) -->
+        <button id="btn-dire" class="btn-rond-verre verre" aria-label="Dis-le">
+          <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+        </button>
         <button id="btn-ajouter" class="btn-rond-verre btn-ajouter verre" aria-label="Ajouter">
           <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </button>
@@ -523,6 +527,26 @@
     </form>
   </dialog>
 
+  <!-- Feuille : « Dis-le » -->
+  <dialog id="fenetre-dire" class="feuille">
+    <form id="form-dire" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong>Dis-le</strong>
+        <button type="submit" class="btn-texte fort" id="btn-ajouter-dire">Ajouter</button>
+      </div>
+      <div class="groupe">
+        <textarea id="champ-dire" rows="3" placeholder="Ex. : demain à 14h dentiste" autocomplete="off" class="champ-dire"></textarea>
+      </div>
+      <p class="aide aide-groupe">🎙 Touche le micro du clavier pour parler au lieu d'écrire.</p>
+      <div id="apercu-dire" class="verre bloc apercu-dire"></div>
+    </form>
+  </dialog>
+
+  <!-- Petit message « Ajouté ✓ » -->
+  <div id="toast" class="toast verre-fort" role="status"></div>
+
   <!-- Feuille : réglages et sauvegarde -->
   <dialog id="fenetre-reglages" class="feuille">
     <form method="dialog">
@@ -569,6 +593,7 @@
   <script src="forme.js"></script>
   <script src="cycle.js"></script>
   <script src="accueil.js"></script>
+  <script src="dire.js"></script>
   <script src="sauvegarde.js"></script>
 </body>
 </html>
