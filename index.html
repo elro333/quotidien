@@ -61,6 +61,8 @@
       <ul id="liste-aujourdhui" class="liste verre"></ul>
       <!-- Petit rappel du budget, rempli par budget.js -->
       <button id="mini-budget" class="verre mini-budget" hidden></button>
+      <!-- Petit rappel des pas et du sport, rempli par forme.js -->
+      <button id="mini-forme" class="verre mini-budget mini-forme" hidden></button>
     </section>
 
     <!-- ===== Onglet 2 : AGENDA, vue « Liste » ===== -->
@@ -117,6 +119,27 @@
       <h2>Mouvements</h2>
       <div id="mouvements"></div>
     </section>
+
+    <!-- ===== Onglet 4 : FORME (tout est dessiné par forme.js) ===== -->
+    <section id="vue-forme" class="vue">
+      <div id="carte-activite" class="verre focus"></div>
+
+      <h2>7 derniers jours</h2>
+      <div id="semaine-pas" class="verre bloc"></div>
+
+      <h2>Poids</h2>
+      <div id="carte-poids" class="verre bloc carte-poids"></div>
+
+      <h2>Séances</h2>
+      <div id="seances"></div>
+
+      <div class="groupe groupe-verre verre">
+        <button type="button" class="ligne ligne-bouton" id="btn-objectifs">
+          <span class="ico" style="background:#ff2d55"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8"/></svg></span>
+          <span class="libelle">Mes objectifs</span>
+        </button>
+      </div>
+    </section>
   </main>
 
   <!-- Barre d'onglets flottante en verre (style iOS 26) + bouton + à côté -->
@@ -134,6 +157,10 @@
       <button data-vue="budget">
         <svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="13" rx="3"/><path d="M2.5 10.5h19"/><path d="M6.5 15h3"/></svg>
         Budget
+      </button>
+      <button data-vue="forme">
+        <svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10z"/><path d="M3 12.5h4.5l1.8-3 2.6 6 2-4h7"/></svg>
+        Forme
       </button>
     </nav>
     <button id="btn-ajouter" class="btn-plus verre-fort" aria-label="Ajouter">
@@ -262,6 +289,77 @@
     </form>
   </dialog>
 
+  <!-- Feuille : noter des pas, un poids ou une séance -->
+  <dialog id="fenetre-forme" class="feuille">
+    <form id="form-forme" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong id="titre-forme">Séance de sport</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+
+      <div class="segment segment-plein" id="type-forme">
+        <button type="button" data-type="pas">Pas</button>
+        <button type="button" data-type="poids">Poids</button>
+        <button type="button" data-type="seance" class="active">Séance</button>
+      </div>
+
+      <label class="montant">
+        <input name="valeur" inputmode="numeric" placeholder="0" autocomplete="off" required>
+        <span id="unite-forme">min</span>
+      </label>
+      <p class="aide aide-centre" id="aide-pas">Le chiffre de l'app Santé : Résumé → Pas.</p>
+
+      <div id="zone-sport">
+        <div class="grille-cat" id="grille-sport"></div>
+        <div class="groupe" style="margin-top:14px">
+          <input name="note" placeholder="Note (ex. : 5 km, jambes…)" autocomplete="off" class="champ-titre">
+        </div>
+      </div>
+
+      <div class="groupe">
+        <label class="ligne">
+          <span class="ico" style="background:#ff3b30"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16"/></svg></span>
+          <span class="libelle">Date</span>
+          <input name="date" type="date" required>
+        </label>
+      </div>
+
+      <button type="button" id="suppr-forme" class="groupe btn-supprimer">Supprimer</button>
+    </form>
+  </dialog>
+
+  <!-- Feuille : objectifs de forme -->
+  <dialog id="fenetre-objectifs" class="feuille">
+    <form id="form-objectifs" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong>Mes objectifs</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div class="groupe">
+        <label class="ligne">
+          <span class="ico" style="background:#ff2d55"><svg viewBox="0 0 24 24"><path d="M8 4c-2 0-3 2-3 4.5S6 13 8 13s2.5-2 2.5-4.5S10 4 8 4zM16 9c-2 0-2.5 2-2.5 4.5S14 18 16 18s3-2 3-4.5S18 9 16 9z"/></svg></span>
+          <span class="libelle">Pas par jour</span>
+          <input name="pas" inputmode="numeric" autocomplete="off">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#30d158"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 9.5V13l2.5 1.5M10 3h4"/></svg></span>
+          <span class="libelle">Sport (min/jour)</span>
+          <input name="minutes" inputmode="numeric" autocomplete="off">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#007aff"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9.5a4 4 0 0 1 6 0L12 13z"/></svg></span>
+          <span class="libelle">Poids visé (kg)</span>
+          <input name="poids" inputmode="decimal" placeholder="facultatif" autocomplete="off">
+        </label>
+      </div>
+      <p class="aide aide-groupe">L'app Santé compte tes pas toute seule : chaque soir, recopie le chiffre ici (bouton « Noter mes pas »).</p>
+    </form>
+  </dialog>
+
   <!-- Feuille : réglages et sauvegarde -->
   <dialog id="fenetre-reglages" class="feuille">
     <form method="dialog">
@@ -294,6 +392,7 @@
   <script src="app.js"></script>
   <!-- Un fichier par onglet : plus facile à lire et à modifier -->
   <script src="budget.js"></script>
+  <script src="forme.js"></script>
   <script src="sauvegarde.js"></script>
 </body>
 </html>

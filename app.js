@@ -131,9 +131,9 @@ function trier(a, b) {
 }
 
 // ---------- 4. Navigation entre onglets ----------
-// Les écrans : "aujourdhui", "taches" (Agenda en liste), "agenda" (Agenda en semaine), "budget".
+// Les écrans : "aujourdhui", "taches" (Agenda en liste), "agenda" (Agenda en semaine), "budget", "forme".
 // L'onglet Agenda de la barre regroupe "taches" et "agenda" (interrupteur Liste / Semaine).
-const TITRES = { aujourdhui: "Aujourd'hui", taches: "Agenda", agenda: "Agenda", budget: "Budget" };
+const TITRES = { aujourdhui: "Aujourd'hui", taches: "Agenda", agenda: "Agenda", budget: "Budget", forme: "Forme" };
 let vueActive = "aujourdhui";
 let sousAgenda = "taches"; // la dernière vue choisie dans l'onglet Agenda
 
@@ -487,10 +487,12 @@ function ouvrirFenetre(tache = null) {
   if (!tache) formulaire.titre.focus();
 }
 
-// Le bouton + ajoute une tâche… ou un mouvement d'argent sur l'onglet Budget
-document.getElementById("btn-ajouter").addEventListener("click", () =>
-  vueActive === "budget" ? ouvrirMouvement() : ouvrirFenetre()
-);
+// Le bouton + ajoute une tâche… un mouvement d'argent sur Budget… une séance sur Forme
+document.getElementById("btn-ajouter").addEventListener("click", () => {
+  if (vueActive === "budget") ouvrirMouvement();
+  else if (vueActive === "forme") ouvrirForme("seance");
+  else ouvrirFenetre();
+});
 document.getElementById("btn-annuler").addEventListener("click", () => fenetre.close());
 
 formulaire.addEventListener("submit", () => {
@@ -574,6 +576,10 @@ function afficher() {
   if (typeof afficherBudget === "function") {
     if (vueActive === "budget") afficherBudget();
     if (vueActive === "aujourdhui") afficherMiniBudget();
+  }
+  if (typeof afficherForme === "function") {
+    if (vueActive === "forme") afficherForme();
+    if (vueActive === "aujourdhui") afficherMiniForme();
   }
 }
 

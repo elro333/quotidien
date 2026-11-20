@@ -25,6 +25,7 @@ function contenuSauvegarde() {
     creeLe: new Date().toISOString(),
     taches,
     budget,
+    forme,
   };
 }
 
@@ -73,12 +74,14 @@ function restaurer(fichier) {
     const nbT = donnees.taches.length;
     const nbM = donnees.budget.mouvements?.length || 0;
     const date = new Date(donnees.creeLe).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-    if (!confirm(`Restaurer la sauvegarde du ${date} ?\n${nbT} tâche(s) et ${nbM} mouvement(s) d'argent.\n\nCe qu'il y a dans l'appli maintenant sera remplacé.`)) return;
+    if (!confirm(`Restaurer la sauvegarde du ${date} ?\n${nbT} tâche(s), ${nbM} mouvement(s) d'argent, ${donnees.forme?.seances?.length || 0} séance(s) de sport.\n\nCe qu'il y a dans l'appli maintenant sera remplacé.`)) return;
 
     taches = donnees.taches;
     budget = { mouvements: donnees.budget.mouvements || [], dettes: donnees.budget.dettes || [] };
+    forme = normaliserForme(donnees.forme); // une ancienne sauvegarde n'a pas de « forme » : on part de zéro
     enregistrer();
     enregistrerBudget();
+    enregistrerForme();
     fenReglages.close();
     afficher();
     alert("C'est restauré ✓");
@@ -99,7 +102,7 @@ function majInfos() {
 
   // Le rappel sur Aujourd'hui : seulement s'il y a des données à protéger
   const rappel = document.getElementById("rappel-sauvegarde");
-  const aDesDonnees = taches.length || budget.mouvements.length;
+  const aDesDonnees = taches.length || budget.mouvements.length || forme.seances.length || forme.poids.length || Object.keys(forme.pas).length;
   const enRetard = !derniere || joursDepuis(derniere) >= JOURS_AVANT_RAPPEL;
   rappel.hidden = !(aDesDonnees && enRetard && vueActive === "aujourdhui");
   rappel.textContent = derniere
