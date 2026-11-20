@@ -1,8 +1,8 @@
-// sw.js — le "service worker" : il garde une copie de l'appli
-// pour qu'elle s'ouvre sans réseau.
-// À chaque nouvelle version de l'appli, on change le numéro ci-dessous
-// pour que l'iPhone télécharge les nouveaux fichiers.
-const VERSION = "quotidien-v7";
+﻿// sw.js â€” le "service worker" : il garde une copie de l'appli
+// pour qu'elle s'ouvre sans rÃ©seau.
+// Ã€ chaque nouvelle version de l'appli, on change le numÃ©ro ci-dessous
+// pour que l'iPhone tÃ©lÃ©charge les nouveaux fichiers.
+const VERSION = "quotidien-v8";
 const FICHIERS = ["./", "index.html", "style.css", "app.js", "budget.js", "manifest.json", "icons/icon-180.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -17,7 +17,7 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
-// Réseau d'abord (pour avoir la dernière version), copie locale si pas de réseau.
+// RÃ©seau d'abord (pour avoir la derniÃ¨re version), copie locale si pas de rÃ©seau.
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   e.respondWith(
