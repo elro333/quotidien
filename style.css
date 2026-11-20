@@ -609,3 +609,14 @@ main { padding-top: calc(var(--haut) + 56px); }
 .texte-mini { display: grid; line-height: 1.15; }
 .texte-mini strong { font-size: 18px; }
 .texte-mini .petit { font-size: 12px; margin-bottom: 3px; }
+
+/* ============================================================
+   Les tâches ★ très importantes
+   ============================================================ */
+.etoile { color: var(--orange); }
+.titre-important { color: var(--orange); }
+.liste-importante { outline: 1.5px solid rgba(255,149,0,.55); outline-offset: -1.5px; }
+.focus .etiquette.importante { color: var(--orange); }
+.focus .etiquette.importante::before { display: none; }
+.bande-jours .points i.important { background: var(--orange); }
+.interrupteur-orange:checked { background: var(--orange) !important; }

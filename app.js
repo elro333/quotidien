@@ -19,7 +19,8 @@ const CATEGORIES = {
 // Une tâche ressemble à ça :
 // { id, titre, date: "2026-11-21", heure: "14:00", cat: "cours", note, fait: false, creeLe,
 //   repete: "" | "jour" | "ouvres" | "jours" | "semaine" | "deux-semaines" | "mois",
-//   jours: [1, 3, 5] }   ← pour "jours" : 0 = dimanche, 1 = lundi … 6 = samedi
+//   jours: [1, 3, 5],    ← pour "jours" : 0 = dimanche, 1 = lundi … 6 = samedi
+//   important: true }    ← l'étoile : toujours en haut, et en premier sur Aujourd'hui
 const CLE = "quotidien.taches.v1";
 let taches = charger();
 
@@ -237,7 +238,13 @@ function ligneTache(t, { montrerDate = true, projection = false } = {}) {
 
   const titre = document.createElement("div");
   titre.className = "t";
-  titre.textContent = t.titre;
+  if (t.important && !t.fait) {
+    const etoile = document.createElement("span");
+    etoile.className = "etoile";
+    etoile.textContent = "★ ";
+    titre.append(etoile);
+  }
+  titre.append(t.titre);
 
   const meta = document.createElement("div");
   meta.className = "m";
@@ -277,6 +284,9 @@ function afficherAujourdhui() {
   // Candidates : en retard + aujourd'hui, puis sans date
   let candidates = aFaire.filter((t) => t.date && t.date <= auj);
   if (candidates.length === 0) candidates = aFaire.filter((t) => !t.date);
+  // Les tâches ★ très importantes passent toujours en premier (même à venir ou sans date)
+  const importantes = aFaire.filter((t) => t.important);
+  candidates = [...importantes, ...candidates.filter((t) => !t.important)];
   const restantes = candidates.filter((t) => !tachesPassees.includes(t.id));
   const focus = restantes[0] || candidates[0];
 
@@ -294,7 +304,8 @@ function afficherAujourdhui() {
   } else {
     const etiquette = document.createElement("div");
     etiquette.className = "etiquette";
-    etiquette.textContent = "Ta prochaine petite tâche";
+    etiquette.textContent = focus.important ? "★ Très important" : "Ta prochaine petite tâche";
+    if (focus.important) etiquette.classList.add("importante");
 
     const titre = document.createElement("div");
     titre.className = "tache-titre";
@@ -305,6 +316,7 @@ function afficherAujourdhui() {
     meta.className = "muted" + (enRetard ? " retard" : "");
     meta.textContent = [
       enRetard ? "En retard (" + jolieDate(focus.date) + ")" : "",
+      focus.date && focus.date > auj ? "Pour " + jolieDate(focus.date) : "",
       focus.heure ? focus.heure.replace(":", "h") : "",
       CATEGORIES[focus.cat]?.nom,
     ].filter(Boolean).join(" · ");
@@ -363,12 +375,16 @@ function afficherTaches() {
   const visibles = taches.filter((t) => filtre === "toutes" || t.cat === filtre).sort(trier);
   const aFaire = visibles.filter((t) => !t.fait);
 
+  // Les ★ ont leur propre section, tout en haut ; on ne les répète pas plus bas
+  const importantes = aFaire.filter((t) => t.important);
+  const normales = aFaire.filter((t) => !t.important);
   const groupes = [
-    ["En retard", aFaire.filter((t) => t.date && t.date < auj)],
-    ["Aujourd'hui", aFaire.filter((t) => t.date === auj)],
-    ["Demain", aFaire.filter((t) => t.date === demain)],
-    ["Plus tard", aFaire.filter((t) => t.date && t.date > demain)],
-    ["Sans date", aFaire.filter((t) => !t.date)],
+    ["★ Très important", importantes],
+    ["En retard", normales.filter((t) => t.date && t.date < auj)],
+    ["Aujourd'hui", normales.filter((t) => t.date === auj)],
+    ["Demain", normales.filter((t) => t.date === demain)],
+    ["Plus tard", normales.filter((t) => t.date && t.date > demain)],
+    ["Sans date", normales.filter((t) => !t.date)],
   ];
 
   const zone = document.getElementById("groupes-taches");
@@ -379,7 +395,8 @@ function afficherTaches() {
     h.textContent = `${nom} · ${liste.length}`;
     const ul = document.createElement("ul");
     ul.className = "liste";
-    remplir(ul, liste, { montrerDate: nom === "Plus tard" || nom === "En retard" });
+    if (liste === importantes) { h.classList.add("titre-important"); ul.classList.add("liste-importante"); }
+    remplir(ul, liste, { montrerDate: ["Plus tard", "En retard", "★ Très important"].includes(nom) });
     zone.append(h, ul);
   }
   if (!aFaire.length) {
@@ -425,8 +442,14 @@ function afficherAgenda() {
     num.textContent = d.getDate();
     const points = document.createElement("span");
     points.className = "points";
-    const nb = taches.filter((t) => (t.date === jour && !t.fait) || tombeLe(t, jour)).length;
-    for (let k = 0; k < Math.min(nb, 3); k++) points.append(document.createElement("i"));
+    // Les tâches ★ d'abord, en orange
+    const duJourLa = taches.filter((t) => (t.date === jour && !t.fait) || tombeLe(t, jour))
+      .sort((a, b) => (b.important ? 1 : 0) - (a.important ? 1 : 0));
+    for (const t of duJourLa.slice(0, 3)) {
+      const i = document.createElement("i");
+      if (t.important) i.className = "important";
+      points.append(i);
+    }
 
     b.append(nom, num, points);
     b.addEventListener("click", () => { jourChoisi = jour; afficher(); });
@@ -495,6 +518,7 @@ function ouvrirFenetre(tache = null) {
   formulaire.cat.value = tache?.cat || "perso";
   formulaire.note.value = tache?.note || "";
   formulaire.repete.value = tache?.repete || "";
+  formulaire.important.checked = !!tache?.important;
   joursChoisis = tache?.jours ? [...tache.jours] : [];
   dessinerJours();
   fenetre.showModal();
@@ -518,6 +542,7 @@ formulaire.addEventListener("submit", () => {
     note: formulaire.note.value.trim(),
     repete: formulaire.repete.value,
     jours: formulaire.repete.value === "jours" ? [...joursChoisis] : [],
+    important: formulaire.important.checked,
   };
   if (!valeurs.titre) return;
   if (valeurs.repete) {
