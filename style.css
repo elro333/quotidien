@@ -471,3 +471,25 @@ dialog form { padding: 8px 16px calc(var(--bas) + 24px); display: flex; flex-dir
 }
 .interrupteur:checked { background: var(--vert) !important; }
 .interrupteur:checked::after { transform: translateX(20px); }
+
+/* ============================================================
+   Réglages et sauvegarde
+   ============================================================ */
+.grand-titre { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.btn-rond-verre {
+  width: 40px; height: 40px; border-radius: 50%; flex: none; margin-bottom: 4px;
+  display: grid; place-items: center; padding: 0; color: var(--texte); cursor: pointer;
+}
+.btn-rond-verre svg { width: 22px; height: 22px; stroke-width: 2.4; }
+
+.rappel-sauvegarde {
+  display: block; width: 100%; text-align: left; margin: 4px 0 6px; padding: 10px 14px;
+  border: none; border-radius: 14px; font: inherit; font-size: 14px; font-weight: 500;
+  background: rgba(0, 122, 255, .12); color: var(--accent); cursor: pointer;
+}
+.rappel-sauvegarde[hidden] { display: none; }
+
+.titre-groupe { font-size: 13px; font-weight: 400; text-transform: uppercase; color: var(--texte-2); margin: 0 16px 6px; letter-spacing: 0; }
+.aide-groupe { margin: 8px 16px 0; font-size: 13px; line-height: 1.35; }
+.ligne-bouton { width: 100%; border: none; background: none; color: var(--accent); font: inherit; text-align: left; cursor: pointer; }
+.ligne-bouton .libelle { font-size: 17px; }
