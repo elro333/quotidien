@@ -83,6 +83,8 @@
         <!-- Récap des pas et du sport, rempli par forme.js -->
         <button id="mini-forme" class="verre tuile"></button>
       </div>
+      <!-- Récap des habitudes (moi.js) -->
+      <button id="mini-moi" class="verre tuile tuile-large"></button>
 
       <!-- La pilule du jour et l'humeur (cycle.js) -->
       <div id="mini-pilule" class="verre bloc carte-pilule" hidden></div>
@@ -261,6 +263,52 @@
       </div>
       </div>
     </section>
+    <!-- ===== Onglet 4 : MOI, le développement personnel (moi.js) ===== -->
+    <section id="vue-moi" class="vue">
+      <div class="segment" id="segment-moi">
+        <button data-sous="habitudes" class="active">Habitudes</button>
+        <button data-sous="envies">À lire / à voir</button>
+        <button data-sous="conseils">Conseils</button>
+      </div>
+
+      <div id="moi-habitudes">
+        <div id="carte-habitudes" class="verre focus"></div>
+        <h2>Mes habitudes</h2>
+        <ul id="liste-habitudes" class="liste verre"></ul>
+        <p class="aide aide-groupe">Coche quand c'est fait. Touche une habitude pour la modifier, + pour en ajouter.</p>
+        <h2>Ma victoire du jour</h2>
+        <div class="groupe groupe-verre verre victoire">
+          <textarea id="victoire-jour" rows="2" placeholder="Une chose dont je suis fière aujourd'hui…"></textarea>
+        </div>
+        <details class="faites" id="details-victoires" hidden>
+          <summary>Mes victoires</summary>
+          <ul id="liste-victoires" class="liste verre"></ul>
+        </details>
+      </div>
+
+      <div id="moi-envies" hidden>
+        <div id="filtres-envies" class="filtres"></div>
+        <h3 class="jour-mvt">En cours</h3>
+        <div id="envies-encours"></div>
+        <h3 class="jour-mvt">À faire</h3>
+        <div id="envies-afaire"></div>
+        <details class="faites">
+          <summary id="resume-finis">Terminés</summary>
+          <div id="envies-finis"></div>
+        </details>
+        <details class="faites" id="details-idees">
+          <summary>💡 Des idées pour commencer</summary>
+          <ul id="idees-envies" class="liste verre"></ul>
+        </details>
+      </div>
+
+      <div id="moi-conseils" hidden>
+        <div id="carte-conseil" class="verre focus"></div>
+        <div id="carte-defi" class="verre bloc carte-pilule"></div>
+        <h2>Mes conseils gardés</h2>
+        <ul id="liste-conseils-gardes" class="liste verre"></ul>
+      </div>
+    </section>
   </main>
 
   <!-- Barre d'onglets flottante en verre (style iOS 26), seule et centrée -->
@@ -278,6 +326,10 @@
       <button data-vue="forme">
         <svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10z"/><path d="M3 12.5h4.5l1.8-3 2.6 6 2-4h7"/></svg>
         Forme
+      </button>
+      <button data-vue="moi">
+        <svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+        Moi
       </button>
     </nav>
   </div>
@@ -737,6 +789,60 @@
     </form>
   </dialog>
 
+  <!-- Feuille : une habitude -->
+  <dialog id="fenetre-habitude" class="feuille">
+    <form id="form-habitude" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong id="titre-habitude">Nouvelle habitude</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div class="groupe">
+        <div class="ligne-nom-recette">
+          <input name="emoji" maxlength="4" placeholder="✨" autocomplete="off" class="champ-emoji" aria-label="Emoji">
+          <input name="nom" placeholder="Ex. : 15 min de marche, méditer, écrire…" autocomplete="off" class="champ-titre">
+        </div>
+      </div>
+      <p class="aide aide-groupe">Une petite chose, faisable même les jours chargés. C'est la régularité qui compte.</p>
+      <button type="button" id="suppr-habitude" class="groupe btn-supprimer">Supprimer l'habitude</button>
+    </form>
+  </dialog>
+
+  <!-- Feuille : à lire / à voir -->
+  <dialog id="fenetre-envie" class="feuille">
+    <form id="form-envie" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong id="titre-feuille-envie">À lire / à voir</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div>
+        <h3 class="titre-groupe" id="nom-type-envie">Livre</h3>
+        <div class="segment segment-plein type-envie" id="type-envie"></div>
+      </div>
+      <div class="groupe">
+        <input name="titre" placeholder="Titre" autocomplete="off" class="champ-titre">
+        <input name="auteur" placeholder="Auteur" autocomplete="off" class="champ-titre champ-second">
+        <input name="lien" placeholder="Lien (facultatif)" inputmode="url" autocomplete="off" class="champ-titre champ-second">
+      </div>
+      <div class="segment segment-plein" id="statut-envie">
+        <button type="button" data-statut="afaire">À faire</button>
+        <button type="button" data-statut="encours">En cours</button>
+        <button type="button" data-statut="fini">Terminé</button>
+      </div>
+      <div id="note-envie" class="note-envie" hidden></div>
+      <div class="groupe">
+        <a class="ligne ligne-bouton" id="ouvrir-envie" target="_blank" rel="noopener">
+          <span class="ico" style="background:#007aff"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span>
+          <span class="libelle">Chercher sur internet</span>
+        </a>
+      </div>
+      <button type="button" id="suppr-envie" class="groupe btn-supprimer">Supprimer</button>
+    </form>
+  </dialog>
+
   <!-- Feuille : réglages et sauvegarde -->
   <dialog id="fenetre-reglages" class="feuille">
     <form method="dialog">
@@ -784,6 +890,7 @@
   <script src="cycle.js"></script>
   <script src="recettes.js"></script>
   <script src="alimentation.js"></script>
+  <script src="moi.js"></script>
   <script src="accueil.js"></script>
   <script src="dire.js"></script>
   <script src="sauvegarde.js"></script>

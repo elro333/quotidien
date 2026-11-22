@@ -797,3 +797,32 @@ li.en-glisse .plaque, li.part .plaque { background: #fff; }
 a.ligne-bouton { text-decoration: none; }
 #form-ma-recette .libelle, #form-article .libelle { flex: 1; white-space: nowrap; }
 #form-ma-recette .ligne input, #form-article .ligne input:not(.interrupteur) { width: 90px; flex: none; }
+
+/* ============================================================
+   Onglet Moi
+   ============================================================ */
+#segment-moi { margin-bottom: 12px; }
+#segment-moi button { font-size: 13px; }
+#moi-habitudes[hidden], #moi-envies[hidden], #moi-conseils[hidden], #details-victoires[hidden], #details-idees[hidden], .note-envie[hidden], #ouvrir-envie[hidden] { display: none; }
+.ligne-habitude .infos { cursor: pointer; }
+.semaine-habitude { display: flex; gap: 5px; margin-top: 5px; }
+.semaine-habitude i { width: 9px; height: 9px; border-radius: 50%; background: rgba(120,120,128,.22); }
+.semaine-habitude i.fait { background: #af52de; }
+.semaine-habitude i.auj { box-shadow: 0 0 0 1.5px var(--texte-2); }
+.serie-habitude { font-size: 14px; font-weight: 600; color: var(--orange); white-space: nowrap; }
+.victoire textarea { padding: 14px 16px !important; font-size: 16px; }
+.victoire { margin-top: 0; }
+.tuile-large { width: 100%; margin-top: 12px; }
+.tuile-large .texte-mini { grid-template-columns: auto; }
+.etiquette-moi { color: #af52de !important; }
+.etiquette-moi::before { background: #af52de !important; }
+.texte-conseil { font-size: 21px; font-weight: 600; line-height: 1.3; margin: 10px 0 4px; }
+.texte-defi { font-size: 17px; margin: 2px 0 4px; line-height: 1.35; }
+.btn-violet { background: #af52de; box-shadow: 0 6px 18px rgba(175,82,222,.3), inset 0 1px 0 rgba(255,255,255,.35); }
+.type-envie button { font-size: 20px; font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif; }
+.champ-second { border-top: .5px solid var(--separateur) !important; font-size: 16px !important; }
+.note-envie { display: flex; justify-content: center; gap: 8px; }
+.etoile-note { border: none; background: none; font-size: 32px; color: var(--orange); cursor: pointer; padding: 0 2px; }
+#idees-envies .btn-texte { flex: none; font-size: 15px; }
+#filtres-envies { margin-bottom: 4px; }
+#vue-moi .jour-mvt { text-transform: none; }

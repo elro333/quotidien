@@ -134,7 +134,7 @@ function trier(a, b) {
 // ---------- 4. Navigation entre onglets ----------
 // Les écrans : "aujourdhui", "taches" (Agenda en liste), "agenda" (Agenda en semaine), "budget", "forme".
 // L'onglet Agenda de la barre regroupe "taches" et "agenda" (interrupteur Liste / Semaine).
-const TITRES = { aujourdhui: "Aujourd'hui", taches: "Agenda", agenda: "Agenda", budget: "Budget", forme: "Forme" };
+const TITRES = { aujourdhui: "Aujourd'hui", taches: "Agenda", agenda: "Agenda", budget: "Budget", forme: "Forme", moi: "Moi" };
 let vueActive = "aujourdhui";
 let sousAgenda = "taches"; // la dernière vue choisie dans l'onglet Agenda
 
@@ -680,6 +680,7 @@ document.getElementById("btn-ajouter").addEventListener("click", () => {
     else if (sousForme === "alim") ouvrirRepas();
     else ouvrirForme("seance");
   }
+  else if (vueActive === "moi") ajouterDansMoi();
   else ouvrirFenetre();
 });
 document.getElementById("btn-annuler").addEventListener("click", () => fenetre.close());
@@ -754,6 +755,8 @@ function afficher() {
     taches: `${taches.filter((t) => !t.fait).length} à faire`,
     agenda: "Semaine",
     budget: "Ce mois-ci",
+    forme: jolieDate(aujourdhui()),
+    moi: jolieDate(aujourdhui()),
   }[vueActive];
   placerPilule();
 
