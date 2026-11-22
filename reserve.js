@@ -50,25 +50,22 @@ function calculMission(t) {
   return { jours: f > 1440 ? 2 : 1, panier: force ?? auto, auto, inconnu: false };
 }
 
-// Le bilan d'un mois : jours payés, paniers, missions sans horaires
+// Le bilan d'un mois : jours payés, paniers, missions sans horaires.
+// Une mission qui passe minuit reste UNE mission, payée 2 jours,
+// et compte en entier dans le mois où elle commence (même le 31 au soir).
 function bilanMois(mois) {
   const [a, m] = mois.split("-").map(Number);
-  const veille = ajouterJours(`${mois}-01`, -1); // une mission du dernier soir du mois d'avant peut déborder
-  const payes = new Set();
-  let paniers = 0, sansHoraires = 0;
-  for (let i = 0; i <= new Date(a, m, 0).getDate(); i++) {
-    const d = ajouterJours(veille, i);
+  let jours = 0, paniers = 0, sansHoraires = 0;
+  for (let n = 1; n <= new Date(a, m, 0).getDate(); n++) {
+    const d = `${mois}-${String(n).padStart(2, "0")}`;
     const t = taches.find((x) => estMission(x) && (x.date === d || tombeLe(x, d)));
     if (!t) continue;
     const c = calculMission(t);
-    if (moisDe(d) === mois) {
-      payes.add(d);
-      if (c.panier) paniers++;
-      if (c.inconnu) sansHoraires++;
-    }
-    if (c.jours === 2 && moisDe(ajouterJours(d, 1)) === mois) payes.add(ajouterJours(d, 1));
+    jours += c.jours;
+    if (c.panier) paniers++;
+    if (c.inconnu) sansHoraires++;
   }
-  return { jours: payes.size, paniers, sansHoraires };
+  return { jours, paniers, sansHoraires };
 }
 
 // Ce qui doit tomber le jour de paie du mois « mois » (missions du mois d'avant)
