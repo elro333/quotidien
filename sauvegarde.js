@@ -86,6 +86,7 @@ function restaurer(fichier) {
     enregistrerForme();
     corbeille = Array.isArray(donnees.corbeille) ? donnees.corbeille : [];
     moi = normaliserMoi(donnees.moi);
+    if (typeof brancherMesIngredients === "function") brancherMesIngredients();
     enregistrerMoi();
     enregistrerCorbeille();
     fenReglages.close();

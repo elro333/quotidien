@@ -55,7 +55,7 @@ const formeVide = () => ({
   //   favoris: [ids] · mesRecettes: [ { id: "ma-…", nom, emoji, minutes, kcal, moments, ingredients, autres, etapes } ]
   //   habituels: [ { nom, ingredient } ] · prix: { "lait": { carrefour: 105, intermarche: 99 } } (centimes)
   //   magasin: "carrefour" | "intermarche"
-  cuisine: { frigo: [], courses: [], repas: {}, favoris: [], mesRecettes: [], habituels: [], prix: {}, magasin: "carrefour" },
+  cuisine: { frigo: [], courses: [], repas: {}, favoris: [], mesRecettes: [], habituels: [], prix: {}, magasin: "carrefour", mesIngredients: [] },
 });
 let forme = chargerForme();
 
@@ -89,6 +89,7 @@ function normaliserForme(f) {
       habituels: f?.cuisine?.habituels || [],
       prix: f?.cuisine?.prix || {},
       magasin: f?.cuisine?.magasin || "carrefour",
+      mesIngredients: f?.cuisine?.mesIngredients || [],   // [ { code: "x-…", nom, rayon } ]
     },
   };
 }

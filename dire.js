@@ -49,6 +49,7 @@ const MOTS_DEPENSES = [
   ["remboursement", ["rembourse a", "rendu a", "rendre a", "rembourser"]],
   ["courses", ["course", "supermarche", "carrefour", "lidl", "monoprix", "intermarche", "auchan", "casino", "franprix", "picard", "marche ", "boulangerie", "epicerie"]],
   ["restos", ["resto", "restaurant", " bar", "cafe", "verre", "sortie", "mcdo", "burger", "sushi", "pizza", "kebab", "uber eats", "deliveroo", "brunch", "diner", "dejeuner"]],
+  ["factures", ["facture", "assurance", "mutuelle", "telephone", "free mobile", "sfr", "bouygues", "orange"]],
   ["abonnements", ["abonnement", "netflix", "spotify", "apple", "icloud", "forfait", "deezer", "disney", "prime"]],
   ["transport", ["essence", "train", "sncf", " bus", "tram", "uber", "taxi", "peage", "parking", "navigo", "ticket", "billet", "carburant"]],
   ["sante", ["pharmacie", "medecin", "docteur", "dentiste", "coiffeur", "sephora", "maquillage", "beaute", "ongles", "sante"]],

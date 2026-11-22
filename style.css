@@ -859,3 +859,8 @@ a.ligne-bouton { text-decoration: none; }
 .rappel-positifs { display: flex; align-items: center; gap: 10px; width: 100%; border: none; font: inherit; color: var(--texte);
   border-radius: 20px; padding: 14px 16px; margin: 0 0 12px; text-align: left; font-weight: 600; cursor: pointer;
   box-shadow: inset 0 0 0 1.5px rgba(175,82,222,.5); }
+
+/* Frigo : tes ingrédients ; Budget : factures */
+.puce-ajout { background: none !important; box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent) !important; font-weight: 600; }
+.croix-ingr { margin-left: 6px; opacity: .75; font-weight: 700; padding: 0 2px; }
+.total-factures { margin: 8px 6px 0; font-weight: 600; color: var(--texte); }

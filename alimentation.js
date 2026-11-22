@@ -172,22 +172,64 @@ function dessinerRecettes() {
   document.getElementById("recettes-presque").replaceChildren(presque);
 }
 
+// ---------- Tes propres ingrédients ----------
+// Ils s'ajoutent aux listes de recettes.js, dans le rayon choisi.
+const estPerso = (code) => code.startsWith("x-");
+function brancherMesIngredients() {
+  for (const ing of forme.cuisine.mesIngredients) {
+    (RAYONS[ing.rayon] || RAYONS.placard).ingredients[ing.code] = ing.nom;
+    INGREDIENTS[ing.code] = ing.nom;
+  }
+}
+function ajouterMonIngredient(cleRayon) {
+  const nom = (prompt(`Quel ingrédient ajouter dans « ${RAYONS[cleRayon].nom} » ?`) || "").trim();
+  if (!nom) return;
+  const existe = Object.entries(INGREDIENTS).find(([, n]) => sansAccentsMin(n) === sansAccentsMin(nom));
+  if (existe) { basculerFrigo(existe[0], true); afficher(); return; } // déjà dans la liste : on le coche
+  const code = "x-" + nouvelId();
+  forme.cuisine.mesIngredients.push({ code, nom: nom[0].toUpperCase() + nom.slice(1), rayon: cleRayon });
+  brancherMesIngredients();
+  basculerFrigo(code, true); // tu l'ajoutes parce que tu l'as
+  afficher();
+}
+function supprimerMonIngredient(code) {
+  const ing = forme.cuisine.mesIngredients.find((x) => x.code === code);
+  if (!ing || !confirm(`Retirer « ${ing.nom} » de ta liste ?`)) return;
+  forme.cuisine.mesIngredients = forme.cuisine.mesIngredients.filter((x) => x.code !== code);
+  delete (RAYONS[ing.rayon] || RAYONS.placard).ingredients[code];
+  delete INGREDIENTS[code];
+  basculerFrigo(code, false);
+  afficher();
+}
+brancherMesIngredients();
+
 function dessinerFrigo() {
   const zone = document.getElementById("zone-frigo");
   zone.replaceChildren();
   document.getElementById("resume-frigo").textContent = `Mon frigo et placard · ${forme.cuisine.frigo.length}`;
-  for (const rayon of Object.values(RAYONS)) {
+  for (const [cleRayon, rayon] of Object.entries(RAYONS)) {
     zone.append(el("h3", "jour-mvt", rayon.nom));
     const puces = el("div", "puces-frigo");
     for (const [code, nom] of Object.entries(rayon.ingredients)) {
       const b = el("button", "puce-frigo" + (aLaMaison(code) ? " on" : ""), nom);
       b.type = "button";
       b.addEventListener("click", () => { basculerFrigo(code); afficher(); });
+      if (estPerso(code)) {
+        // Les tiens ont une petite croix pour les retirer de la liste
+        const x = el("span", "croix-ingr", "×");
+        x.setAttribute("aria-label", `Retirer ${nom}`);
+        x.addEventListener("click", (e) => { e.stopPropagation(); supprimerMonIngredient(code); });
+        b.append(x);
+      }
       puces.append(b);
     }
+    const plus = el("button", "puce-frigo puce-ajout", "+ Ajouter");
+    plus.type = "button";
+    plus.addEventListener("click", () => ajouterMonIngredient(cleRayon));
+    puces.append(plus);
     zone.append(puces);
   }
-  zone.append(el("p", "aide", "Sel, poivre, huile et eau : on fait comme si tu en avais toujours."));
+  zone.append(el("p", "aide", "Vert = je l'ai. Touche pour cocher ou décocher. « + Ajouter » pour un ingrédient qui manque à la liste. Sel, poivre, huile et eau : on fait comme si tu en avais toujours."));
 }
 
 function basculerFrigo(code, present) {

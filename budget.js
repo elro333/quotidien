@@ -11,6 +11,7 @@
 const CAT_DEPENSES = {
   courses:      { nom: "Courses",        emoji: "🛒", couleur: "#34c759" },
   restos:       { nom: "Restos, sorties", emoji: "🍕", couleur: "#ff9500" },
+  factures:     { nom: "Factures",       emoji: "🧾", couleur: "#ff9f0a" },
   abonnements:  { nom: "Abonnements",    emoji: "📱", couleur: "#5856d6" },
   transport:    { nom: "Transport",      emoji: "🚆", couleur: "#007aff" },
   shopping:     { nom: "Shopping",       emoji: "🛍️", couleur: "#ff2d55" },
@@ -138,6 +139,7 @@ function afficherBudget() {
   const t = totauxDuMois(moisAffiche);
   dessinerReste(t);
   dessinerRepartition(t);
+  dessinerFactures();
   dessinerDettes();
   dessinerMouvements(t);
 }
@@ -200,6 +202,46 @@ function dessinerRepartition({ liste, depenses }) {
     ligne.append(pastilleCat(c), texte);
     zone.append(ligne);
   }
+}
+
+// ---------- Les factures mensuelles ----------
+// Ce sont les dépenses cochées « Chaque mois » : l'appli les recopie
+// toute seule chaque mois. Ici, on les voit toutes au même endroit.
+function occurrenceDuMois(modele, mois) {
+  if (moisDe(modele.date) === mois) return modele;
+  return budget.mouvements.find((m) => m.modeleId === modele.id && moisDe(m.date) === mois) || null;
+}
+
+function dessinerFactures() {
+  const zone = document.getElementById("factures");
+  zone.replaceChildren();
+  const modeles = budget.mouvements
+    .filter((m) => m.mensuel && m.type === "depense")
+    .sort((a, b) => Number(a.date.slice(8, 10)) - Number(b.date.slice(8, 10)));
+  if (!modeles.length) {
+    zone.append(el("p", "aide", "Ton forfait téléphone, ton assurance, tes abonnements… Ajoute-les une fois : ils se recopient tout seuls chaque mois."));
+    return;
+  }
+  const total = modeles.reduce((t, m) => t + m.montant, 0);
+  const ul = el("ul", "liste verre");
+  for (const modele of modeles) {
+    const c = catDe(modele);
+    const li = el("li", "ligne-mvt");
+    const infos = el("div", "infos");
+    infos.append(el("div", "t", modele.libelle || c.nom));
+    const jour = Number(modele.date.slice(8, 10));
+    const occ = occurrenceDuMois(modele, moisAffiche);
+    let statut;
+    if (moisAffiche < moisDe(modele.date)) statut = "pas encore commencée";
+    else if (occ && occ.date <= aujourdhui()) statut = `payée le ${jour} ✓`;
+    else statut = `prélevée le ${jour}`;
+    infos.append(el("div", "m", `${c.nom} · ${statut}`));
+    li.append(pastilleCat(c), infos, el("strong", "montant-ligne", euros(modele.montant)));
+    li.addEventListener("click", () => ouvrirMouvement(modele));
+    ul.append(li);
+  }
+  zone.append(ul);
+  zone.append(el("p", "petit total-factures", `Total : ${euros(total)} par mois`));
 }
 
 function rembourseSur(dette) {
@@ -329,15 +371,15 @@ document.querySelectorAll("#type-mvt button").forEach((b) =>
   b.addEventListener("click", () => { typeMvt = b.dataset.type; dessinerGrilleCat(); })
 );
 
-function ouvrirMouvement(m = null) {
+function ouvrirMouvement(m = null, preRempli = {}) {
   mvtEdite = m;
   typeMvt = m?.type || "depense";
-  catMvt = m?.cat || (typeMvt === "revenu" ? "salaire" : "courses");
+  catMvt = m?.cat || preRempli.cat || (typeMvt === "revenu" ? "salaire" : "courses");
   formMvt.montant.value = m ? versTexteMontant(m.montant) : "";
   formMvt.libelle.value = m?.libelle || "";
   // Nouveau mouvement : aujourd'hui si on regarde ce mois-ci, sinon le 1er du mois affiché
   formMvt.date.value = m?.date || (moisAffiche === moisActuel() ? aujourdhui() : moisAffiche + "-01");
-  formMvt.mensuel.checked = !!m?.mensuel;
+  formMvt.mensuel.checked = !!(m ? m.mensuel : preRempli.mensuel);
   document.getElementById("suppr-mvt").style.display = m ? "" : "none";
   dessinerGrilleCat();
   fenMvt.showModal();
@@ -391,6 +433,7 @@ function ouvrirDette(d = null) {
   fenDette.showModal();
 }
 document.getElementById("btn-nouvelle-dette").addEventListener("click", () => ouvrirDette());
+document.getElementById("btn-nouvelle-facture").addEventListener("click", () => ouvrirMouvement(null, { cat: "factures", mensuel: true }));
 
 formDette.addEventListener("submit", (e) => {
   const total = lireMontant(formDette.total.value);
