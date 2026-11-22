@@ -938,3 +938,6 @@ a.ligne-bouton { text-decoration: none; }
 .tableau-decl th { color: var(--texte-2); font-weight: 600; }
 .tableau-decl td { font-weight: 600; color: #c96f00; }
 #mini-langues { margin-top: 12px; }
+
+.bouton-inventer { margin: 10px 0 2px; font-size: 17px; }
+.aide-invente { margin: 0 4px -4px; color: var(--vert); }

@@ -169,6 +169,8 @@ function dessinerRecettes() {
     ? "Rien de complet avec ce que tu as. Regarde juste en dessous : il manque souvent un seul ingrédient."
     : "Coche d'abord ce que tu as dans « Mon frigo et placard », plus bas."));
   document.getElementById("titre-presque").textContent = `Avec quelques courses · ${presque.children.length}`;
+  // Rien de complet ? On montre directement celles où il manque peu
+  if (!ok.children.length) document.getElementById("titre-presque").parentElement.open = true;
   document.getElementById("recettes-presque").replaceChildren(presque);
 }
 
