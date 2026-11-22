@@ -864,3 +864,13 @@ a.ligne-bouton { text-decoration: none; }
 .puce-ajout { background: none !important; box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent) !important; font-weight: 600; }
 .croix-ingr { margin-left: 6px; opacity: .75; font-weight: 700; padding: 0 2px; }
 .total-factures { margin: 8px 6px 0; font-weight: 600; color: var(--texte); }
+
+/* Budget › Réserve */
+.carte-reserve { margin-top: 12px; }
+.lignes-reserve { width: 100%; display: flex; flex-direction: column; gap: 3px; margin: 4px 0; }
+.ligne-reserve { display: flex; justify-content: space-between; font-size: 15px; font-variant-numeric: tabular-nums; }
+.ligne-reserve.fort { font-weight: 700; }
+.ecart-reserve { margin: 2px 0 4px; font-size: 14px; font-weight: 600; }
+.prochaine-paie { margin-top: 8px !important; }
+#form-reserve .libelle { flex: 1; white-space: nowrap; }
+#form-reserve .ligne input:not(.interrupteur) { width: 80px; flex: none; }

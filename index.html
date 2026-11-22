@@ -140,6 +140,8 @@
       </div>
 
       <div id="carte-reste" class="verre focus carte-reste"></div>
+      <!-- La paie de la réserve : attendue, reçue, ce qui manque (reserve.js) -->
+      <div id="carte-reserve" class="verre bloc carte-pilule carte-reserve"></div>
 
       <h2>Dépenses par catégorie</h2>
       <div id="repartition" class="verre bloc"></div>
@@ -434,6 +436,11 @@
           <span class="ico" style="background:#ff9500"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg></span>
           <span class="libelle">Très important</span>
           <input name="important" type="checkbox" class="interrupteur interrupteur-orange">
+        </label>
+        <label class="ligne" id="ligne-mission" hidden>
+          <span class="ico" style="background:#34c759"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <span class="libelle">Mission payée</span>
+          <input name="mission" type="checkbox" class="interrupteur">
         </label>
       </div>
 
@@ -911,6 +918,46 @@
     </form>
   </dialog>
 
+  <!-- Feuille : réglages de la réserve -->
+  <dialog id="fenetre-reserve" class="feuille">
+    <form id="form-reserve" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong>Ma paie de réserve</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div class="groupe">
+        <label class="ligne">
+          <span class="ico" style="background:#34c759"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg></span>
+          <span class="libelle">Par mission (€)</span>
+          <input name="tarif" inputmode="decimal" autocomplete="off">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#ff9500"><svg viewBox="0 0 24 24"><path d="M5 11h14M6 11a6 6 0 0 0 12 0M12 5v3"/></svg></span>
+          <span class="libelle">Panier repas (€)</span>
+          <input name="panier" inputmode="decimal" autocomplete="off">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#007aff"><svg viewBox="0 0 24 24"><path d="M5 17h14l-2-7H7z"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg></span>
+          <span class="libelle">Km par mission (€)</span>
+          <input name="km" inputmode="decimal" placeholder="moyenne" autocomplete="off">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#ff3b30"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16"/></svg></span>
+          <span class="libelle">Jour de paie</span>
+          <input name="jourPaie" inputmode="numeric" autocomplete="off">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#af52de"><svg viewBox="0 0 24 24"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13"/></svg></span>
+          <span class="libelle">Paniers un mois après</span>
+          <input name="panierDecale" type="checkbox" class="interrupteur">
+        </label>
+      </div>
+      <p class="aide aide-groupe">Les missions = les tâches « Réserve » de l'Agenda (un jour = une mission). Elles sont payées vers le jour de paie du mois suivant. Les km varient : mets une moyenne, ou 0.</p>
+    </form>
+  </dialog>
+
   <!-- Feuille : réglages et sauvegarde -->
   <dialog id="fenetre-reglages" class="feuille">
     <form method="dialog">
@@ -954,6 +1001,7 @@
   <script src="app.js"></script>
   <!-- Un fichier par onglet : plus facile à lire et à modifier -->
   <script src="budget.js"></script>
+  <script src="reserve.js"></script>
   <script src="forme.js"></script>
   <script src="cycle.js"></script>
   <script src="recettes.js"></script>

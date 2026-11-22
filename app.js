@@ -654,6 +654,12 @@ function dessinerJours() {
 }
 formulaire.repete.addEventListener("change", dessinerJours);
 
+// La ligne « Mission payée » n'apparaît que pour la catégorie Réserve
+function majLigneMission() {
+  document.getElementById("ligne-mission").hidden = formulaire.cat.value !== "reserve";
+}
+formulaire.cat.addEventListener("change", majLigneMission);
+
 function ouvrirFenetre(tache = null) {
   enEdition = tache;
   document.getElementById("titre-fenetre").textContent = tache ? "Modifier" : "Nouvelle tâche";
@@ -666,6 +672,9 @@ function ouvrirFenetre(tache = null) {
   formulaire.note.value = tache?.note || "";
   formulaire.repete.value = tache?.repete || "";
   formulaire.important.checked = !!tache?.important;
+  // Réserve : une tâche compte comme mission payée, sauf si on décoche
+  formulaire.mission.checked = tache ? tache.mission !== false : true;
+  majLigneMission();
   joursChoisis = tache?.jours ? [...tache.jours] : [];
   dessinerJours();
   fenetre.showModal();
@@ -695,6 +704,7 @@ formulaire.addEventListener("submit", () => {
     repete: formulaire.repete.value,
     jours: formulaire.repete.value === "jours" ? [...joursChoisis] : [],
     important: formulaire.important.checked,
+    mission: formulaire.cat.value === "reserve" ? formulaire.mission.checked : undefined,
   };
   if (!valeurs.titre) return;
   if (valeurs.repete) {

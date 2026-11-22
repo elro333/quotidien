@@ -44,7 +44,7 @@ let budget = chargerBudget();
 function chargerBudget() {
   try {
     const b = JSON.parse(localStorage.getItem(CLE_BUDGET));
-    return { mouvements: b?.mouvements || [], dettes: b?.dettes || [] };
+    return { mouvements: b?.mouvements || [], dettes: b?.dettes || [], reserve: b?.reserve };
   } catch (e) {
     return { mouvements: [], dettes: [] };
   }
