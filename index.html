@@ -92,6 +92,8 @@
         <!-- Récap des pas et du sport, rempli par forme.js -->
         <button id="mini-forme" class="verre tuile"></button>
       </div>
+      <!-- Les cartes de langues du jour (langues.js) -->
+      <button id="mini-langues" class="verre rappel-positifs btn-bilan"></button>
       <!-- Récap des habitudes (moi.js) -->
       <button id="mini-moi" class="verre tuile tuile-large"></button>
 
@@ -288,6 +290,21 @@
       </div>
       </div>
     </section>
+    <!-- ===== Onglet LANGUES (langues.js + mots.js) ===== -->
+    <section id="vue-langues" class="vue">
+      <div class="segment" id="segment-langues">
+        <button data-langue="it" class="active">🇮🇹 Italien</button>
+        <button data-langue="de">🇩🇪 Allemand</button>
+        <button data-langue="en">🇬🇧 Anglais</button>
+      </div>
+      <div class="filtres" id="modes-allemand" hidden>
+        <button data-mode="cartes" class="active">Vocabulaire</button>
+        <button data-mode="articles">Der, die, das ?</button>
+        <button data-mode="declinaisons">Déclinaisons</button>
+      </div>
+      <div id="zone-langue"></div>
+    </section>
+
     <!-- ===== Onglet 4 : MOI, le développement personnel (moi.js + positifs.js) ===== -->
     <section id="vue-moi" class="vue">
       <div class="segment" id="segment-moi">
@@ -390,6 +407,10 @@
       <button data-vue="forme">
         <svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10z"/><path d="M3 12.5h4.5l1.8-3 2.6 6 2-4h7"/></svg>
         Forme
+      </button>
+      <button data-vue="langues">
+        <svg viewBox="0 0 24 24"><path d="M4 5h9a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H8l-4 3z"/><path d="M15 9h3a2 2 0 0 1 2 2v5l-3-2h-4a2 2 0 0 1-2-2"/></svg>
+        Langues
       </button>
       <button data-vue="moi">
         <svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
@@ -1085,6 +1106,8 @@
   <script src="alimentation.js"></script>
   <script src="moi.js"></script>
   <script src="positifs.js"></script>
+  <script src="mots.js"></script>
+  <script src="langues.js"></script>
   <script src="accueil.js"></script>
   <script src="dire.js"></script>
   <script src="calendrier.js"></script>

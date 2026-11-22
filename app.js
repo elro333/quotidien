@@ -134,7 +134,7 @@ function trier(a, b) {
 // ---------- 4. Navigation entre onglets ----------
 // Les écrans : "aujourdhui", "taches" (Agenda en liste), "agenda" (Agenda en semaine), "budget", "forme".
 // L'onglet Agenda de la barre regroupe "taches" et "agenda" (interrupteur Liste / Semaine).
-const TITRES = { aujourdhui: "Aujourd'hui", taches: "Agenda", agenda: "Agenda", budget: "Budget", forme: "Forme", moi: "Moi" };
+const TITRES = { aujourdhui: "Aujourd'hui", taches: "Agenda", agenda: "Agenda", budget: "Budget", forme: "Forme", moi: "Moi", langues: "Langues" };
 let vueActive = "aujourdhui";
 let sousAgenda = "taches"; // la dernière vue choisie dans l'onglet Agenda
 
@@ -788,6 +788,7 @@ function afficher() {
     budget: "Ce mois-ci",
     forme: jolieDate(aujourdhui()),
     moi: jolieDate(aujourdhui()),
+    langues: jolieDate(aujourdhui()),
   }[vueActive];
   placerPilule();
 

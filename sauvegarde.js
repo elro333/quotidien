@@ -28,6 +28,7 @@ function contenuSauvegarde() {
     forme,
     corbeille,
     moi,
+    langues,
   };
 }
 
@@ -86,6 +87,12 @@ function restaurer(fichier) {
     enregistrerForme();
     corbeille = Array.isArray(donnees.corbeille) ? donnees.corbeille : [];
     moi = normaliserMoi(donnees.moi);
+    if (donnees.langues) {
+      langues = donnees.langues;
+      for (const k of Object.keys(LANGUES)) langues[k] ||= { cartes: {} };
+      langues.jours ||= {};
+      enregistrerLangues();
+    }
     if (typeof brancherMesIngredients === "function") brancherMesIngredients();
     enregistrerMoi();
     enregistrerCorbeille();
