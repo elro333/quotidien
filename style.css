@@ -826,3 +826,36 @@ a.ligne-bouton { text-decoration: none; }
 #idees-envies .btn-texte { flex: none; font-size: 15px; }
 #filtres-envies { margin-bottom: 4px; }
 #vue-moi .jour-mvt { text-transform: none; }
+
+/* ============================================================
+   Moi › Positifs et Culture G
+   ============================================================ */
+#segment-moi button { font-size: 12.5px; }
+#moi-positifs[hidden], #moi-culture[hidden], #tu-te-souviens[hidden], #details-infos-gardees[hidden],
+#souvenir-hasard[hidden], .rappel-positifs[hidden] { display: none; }
+.positifs-du-jour { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ligne-positif { display: flex; align-items: flex-start; gap: 10px; background: rgba(175,82,222,.08); border-radius: 14px; padding: 10px 12px; }
+.emoji-positif { font-size: 20px; line-height: 1.3; font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif; }
+.ligne-positif textarea {
+  flex: 1; border: none; background: none; resize: none; font: inherit; font-size: 16px; line-height: 1.35;
+  color: var(--texte); outline: none; padding: 2px 0; min-height: 24px; overflow: hidden;
+}
+.stats-positifs { margin-top: 12px; padding: 12px 16px 14px; }
+.stats-positifs .deux-totaux { margin-top: 0; }
+.stats-positifs strong { font-size: 24px !important; color: #af52de; }
+.souvenir { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; border: none; font: inherit; color: var(--texte);
+  background: rgba(175,82,222,.1); border-radius: 14px; padding: 10px 12px; margin-top: 12px; cursor: pointer; font-size: 15px; }
+.souvenir-hasard { border-radius: 20px; padding: 14px 16px; }
+.bouton-souvenir { width: 100%; margin-top: 12px; }
+.num-cal.positif-1 { background: rgba(175,82,222,.25); }
+.num-cal.positif-2 { background: rgba(175,82,222,.5); color: #fff; }
+.num-cal.positif-3 { background: #af52de; color: #fff; font-weight: 600; }
+.case-cal:disabled { opacity: .35; cursor: default; }
+#tu-te-souviens { margin-top: 12px; }
+.form-appris textarea { padding: 14px 16px 6px !important; font-size: 16px; }
+.ligne-source { display: flex; align-items: center; gap: 8px; padding: 4px 12px 8px 16px; border-top: .5px solid var(--separateur); }
+.ligne-source input { flex: 1; min-width: 0; border: none; background: none; font: inherit; font-size: 15px; color: var(--texte); outline: none; padding: 8px 0; }
+#liste-appris .btn-texte { flex: none; font-size: 20px; color: var(--texte-2); }
+.rappel-positifs { display: flex; align-items: center; gap: 10px; width: 100%; border: none; font: inherit; color: var(--texte);
+  border-radius: 20px; padding: 14px 16px; margin: 0 0 12px; text-align: left; font-weight: 600; cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px rgba(175,82,222,.5); }

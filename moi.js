@@ -105,21 +105,35 @@ const moiVide = () => ({
     { id: "h-moi", nom: "10 minutes rien que pour moi", emoji: "🧘‍♀️" },
   ],
   coches: {},        // { "2026-11-22": ["h-lire", …] }
-  victoires: {},     // { "2026-11-22": "texte" }
   envies: [],        // [ { id, type, titre, auteur, lien, statut: "afaire"|"encours"|"fini", note, finiLe, creeLe } ]
   conseilsGardes: [],// index dans CONSEILS
   defis: {},         // { "2026-S47": true }
+  positifs: {},      // { "2026-11-22": ["petit rien", "bon moment", "le plus beau"] }  (positifs.js)
+  appris: [],        // [ { id, date, texte, source, r7, r30 } ]                        (positifs.js)
+  infosGardees: [],  // index dans SAVAIS_TU                                             (positifs.js)
 });
 function normaliserMoi(m) {
   const v = moiVide();
   return {
     habitudes: m?.habitudes || v.habitudes,
     coches: m?.coches || {},
-    victoires: m?.victoires || {},
     envies: m?.envies || [],
     conseilsGardes: m?.conseilsGardes || [],
     defis: m?.defis || {},
+    positifs: versPositifs(m),
+    appris: m?.appris || [],
+    infosGardees: m?.infosGardees || [],
   };
+}
+// L'ancienne « victoire du jour » devient le 3e positif de ce jour-là
+function versPositifs(m) {
+  const p = { ...(m?.positifs || {}) };
+  for (const [d, texte] of Object.entries(m?.victoires || {})) {
+    const l = [...(p[d] || ["", "", ""])];
+    if (!l[2]) l[2] = texte;
+    p[d] = l;
+  }
+  return p;
 }
 let moi = (() => {
   try { return normaliserMoi(JSON.parse(localStorage.getItem(CLE_MOI))); } catch (e) { return moiVide(); }
@@ -151,7 +165,7 @@ let sousMoi = "habitudes";
 function changerSousMoi(s) {
   sousMoi = s;
   document.querySelectorAll("#segment-moi button").forEach((b) => b.classList.toggle("active", b.dataset.sous === s));
-  for (const p of ["habitudes", "envies", "conseils"]) document.getElementById("moi-" + p).hidden = p !== s;
+  for (const p of ["habitudes", "positifs", "culture", "envies"]) document.getElementById("moi-" + p).hidden = p !== s;
   window.scrollTo(0, 0);
   afficher();
 }
@@ -159,9 +173,9 @@ document.querySelectorAll("#segment-moi button").forEach((b) => b.addEventListen
 
 function afficherMoi() {
   document.getElementById("sous-titre").textContent = jolieDate(aujourdhui());
-  if (sousMoi === "habitudes") dessinerHabitudes();
+  if (sousMoi === "habitudes") { dessinerHabitudes(); dessinerConseils(); }
   if (sousMoi === "envies") dessinerEnvies();
-  if (sousMoi === "conseils") dessinerConseils();
+  // Positifs et Culture G : dessinés par positifs.js
 }
 
 // ---------- 5. Habitudes ----------
@@ -216,27 +230,7 @@ function dessinerHabitudes() {
     return li;
   }));
   if (!moi.habitudes.length) ul.append(el("li", "vide-msg", "Touche + pour ajouter une habitude."));
-
-  // Ma victoire du jour
-  const champ = document.getElementById("victoire-jour");
-  if (document.activeElement !== champ) champ.value = moi.victoires[auj] || "";
-  const anciennes = Object.keys(moi.victoires).filter((d) => d < auj).sort().reverse().slice(0, 30);
-  const zone = document.getElementById("liste-victoires");
-  zone.replaceChildren(...anciennes.map((d) => {
-    const li = el("li");
-    const i = el("div", "infos");
-    i.append(el("div", "t", moi.victoires[d]), el("div", "m", jolieDate(d)));
-    li.append(i);
-    return li;
-  }));
-  document.getElementById("details-victoires").hidden = !anciennes.length;
 }
-document.getElementById("victoire-jour").addEventListener("input", (e) => {
-  const t = e.target.value.trim();
-  if (t) moi.victoires[aujourdhui()] = t;
-  else delete moi.victoires[aujourdhui()];
-  enregistrerMoi();
-});
 
 // Feuille « habitude »
 const fenHabitude = document.getElementById("fenetre-habitude");
@@ -483,7 +477,9 @@ for (const fen of [fenHabitude, fenEnvie]) {
   fen.addEventListener("click", (e) => { if (e.target === fen) fen.close(); });
 }
 function ajouterDansMoi() {
-  if (sousMoi === "envies" || sousMoi === "conseils") ouvrirEnvie();
+  if (sousMoi === "envies") ouvrirEnvie();
+  else if (sousMoi === "positifs") ouvrirJourPositifs(aujourdhui());
+  else if (sousMoi === "culture") document.getElementById("champ-appris").focus();
   else ouvrirHabitude();
 }
 

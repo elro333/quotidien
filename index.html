@@ -72,6 +72,8 @@
     <section id="vue-aujourdhui" class="vue active">
       <!-- La phrase du jour (accueil.js) -->
       <p id="phrase-du-jour" class="phrase-du-jour"></p>
+      <!-- Le soir : rappel des 3 positifs (positifs.js) -->
+      <button id="rappel-positifs" class="verre rappel-positifs" hidden></button>
       <div id="carte-focus" class="verre focus"></div>
 
       <button class="titre-lien" data-aller="agenda"><h2>Agenda du jour</h2><span>›</span></button>
@@ -263,12 +265,13 @@
       </div>
       </div>
     </section>
-    <!-- ===== Onglet 4 : MOI, le développement personnel (moi.js) ===== -->
+    <!-- ===== Onglet 4 : MOI, le développement personnel (moi.js + positifs.js) ===== -->
     <section id="vue-moi" class="vue">
       <div class="segment" id="segment-moi">
         <button data-sous="habitudes" class="active">Habitudes</button>
-        <button data-sous="envies">À lire / à voir</button>
-        <button data-sous="conseils">Conseils</button>
+        <button data-sous="positifs">Positifs</button>
+        <button data-sous="culture">Culture G</button>
+        <button data-sous="envies">À voir</button>
       </div>
 
       <div id="moi-habitudes">
@@ -276,13 +279,58 @@
         <h2>Mes habitudes</h2>
         <ul id="liste-habitudes" class="liste verre"></ul>
         <p class="aide aide-groupe">Coche quand c'est fait. Touche une habitude pour la modifier, + pour en ajouter.</p>
-        <h2>Ma victoire du jour</h2>
-        <div class="groupe groupe-verre verre victoire">
-          <textarea id="victoire-jour" rows="2" placeholder="Une chose dont je suis fière aujourd'hui…"></textarea>
+        <h2>Pour aujourd'hui</h2>
+        <div id="carte-conseil" class="verre focus"></div>
+        <div id="carte-defi" class="verre bloc carte-pilule"></div>
+        <details class="faites">
+          <summary>Mes conseils gardés</summary>
+          <ul id="liste-conseils-gardes" class="liste verre"></ul>
+        </details>
+      </div>
+
+      <div id="moi-positifs" hidden>
+        <div class="verre focus">
+          <div class="etiquette etiquette-moi">Mes 3 positifs d'aujourd'hui</div>
+          <p class="petit">Du plus petit rien au plus beau moment.</p>
+          <div id="positifs-du-jour" class="positifs-du-jour"></div>
         </div>
-        <details class="faites" id="details-victoires" hidden>
-          <summary>Mes victoires</summary>
-          <ul id="liste-victoires" class="liste verre"></ul>
+        <div id="stats-positifs" class="verre bloc stats-positifs"></div>
+        <button id="souvenir-hasard" class="verre souvenir souvenir-hasard" hidden></button>
+        <h2>Calendrier</h2>
+        <div class="verre bloc">
+          <div class="nav-semaine nav-mois">
+            <button id="mois-positifs-prec" class="btn-icone" aria-label="Mois précédent">
+              <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+            </button>
+            <strong id="titre-mois-positifs"></strong>
+            <button id="mois-positifs-suiv" class="btn-icone" aria-label="Mois suivant">
+              <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <div id="calendrier-positifs" class="calendrier-cycle"></div>
+          <p class="legende-cal">Touche un jour pour relire (ou compléter) ses positifs.</p>
+        </div>
+      </div>
+
+      <div id="moi-culture" hidden>
+        <div id="carte-savais-tu" class="verre focus"></div>
+        <div id="tu-te-souviens" class="verre focus" hidden></div>
+        <h2>J'ai appris aujourd'hui</h2>
+        <form id="form-appris" class="groupe groupe-verre verre form-appris">
+          <textarea id="champ-appris" rows="2" placeholder="Ce que j'ai appris (un article, une vidéo, une discussion…)"></textarea>
+          <div class="ligne-source">
+            <input id="source-appris" placeholder="Où ? (facultatif)" autocomplete="off">
+            <button class="btn-texte fort">Noter</button>
+          </div>
+        </form>
+        <p class="aide aide-groupe">L'appli te le redemande 7 jours puis 30 jours plus tard : c'est comme ça qu'on retient.</p>
+        <details class="faites" open>
+          <summary id="resume-appris">Mon carnet</summary>
+          <ul id="liste-appris" class="liste verre"></ul>
+        </details>
+        <details class="faites" id="details-infos-gardees" hidden>
+          <summary>Mes « le savais-tu » gardés</summary>
+          <ul id="liste-infos-gardees" class="liste verre"></ul>
         </details>
       </div>
 
@@ -300,13 +348,6 @@
           <summary>💡 Des idées pour commencer</summary>
           <ul id="idees-envies" class="liste verre"></ul>
         </details>
-      </div>
-
-      <div id="moi-conseils" hidden>
-        <div id="carte-conseil" class="verre focus"></div>
-        <div id="carte-defi" class="verre bloc carte-pilule"></div>
-        <h2>Mes conseils gardés</h2>
-        <ul id="liste-conseils-gardes" class="liste verre"></ul>
       </div>
     </section>
   </main>
@@ -843,6 +884,27 @@
     </form>
   </dialog>
 
+  <!-- Feuille : les 3 positifs d'un jour -->
+  <dialog id="fenetre-positifs" class="feuille">
+    <form id="form-positifs" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Fermer</button>
+        <strong id="titre-positifs">Ce jour-là</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div class="groupe">
+        <textarea name="p0" rows="2"></textarea>
+      </div>
+      <div class="groupe">
+        <textarea name="p1" rows="2"></textarea>
+      </div>
+      <div class="groupe">
+        <textarea name="p2" rows="2"></textarea>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Feuille : réglages et sauvegarde -->
   <dialog id="fenetre-reglages" class="feuille">
     <form method="dialog">
@@ -891,6 +953,7 @@
   <script src="recettes.js"></script>
   <script src="alimentation.js"></script>
   <script src="moi.js"></script>
+  <script src="positifs.js"></script>
   <script src="accueil.js"></script>
   <script src="dire.js"></script>
   <script src="sauvegarde.js"></script>
