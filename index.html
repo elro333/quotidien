@@ -163,12 +163,23 @@
         <div id="carte-repas" class="verre focus"></div>
 
         <h2>Recettes</h2>
-        <div class="segment segment-plein" id="temps-dispo">
-          <button data-min="0" class="active">Tout</button>
-          <button data-min="15">15 min</button>
-          <button data-min="30">30 min</button>
-          <button data-min="45">45 min</button>
+        <div class="segment segment-plein" id="moment-repas">
+          <button data-moment="petitdej">☕ Petit-déj</button>
+          <button data-moment="dejeuner">🍽 Déj</button>
+          <button data-moment="gouter">🍪 Goûter</button>
+          <button data-moment="diner">🌙 Dîner</button>
         </div>
+        <div class="segment segment-plein segment-petit" id="temps-dispo">
+          <button data-min="0" class="active">Tout temps</button>
+          <button data-min="15">≤ 15 min</button>
+          <button data-min="30">≤ 30 min</button>
+          <button data-min="45">≤ 45 min</button>
+        </div>
+        <div class="titre-avec-bouton">
+          <h3 class="jour-mvt">♥ Nos préférées</h3>
+          <button type="button" id="btn-ma-recette" class="btn-texte">+ Ma recette</button>
+        </div>
+        <div id="recettes-favoris"></div>
         <h3 class="jour-mvt">Avec ce que tu as</h3>
         <div id="recettes-ok"></div>
         <details class="faites">
@@ -182,11 +193,22 @@
         </details>
 
         <h2>Courses</h2>
+        <div class="segment segment-plein segment-petit" id="choix-magasin">
+          <button data-magasin="carrefour">Carrefour</button>
+          <button data-magasin="intermarche">Intermarché</button>
+        </div>
+        <div id="bloc-habituels">
+          <h3 class="jour-mvt">★ Habituels · touche pour ajouter</h3>
+          <div id="habituels" class="puces-frigo"></div>
+        </div>
         <form id="form-course" class="ajout-course verre">
           <input id="champ-course" placeholder="Ajouter (ex. : lait)" autocomplete="off" enterkeyhint="done">
           <button class="btn-texte fort">Ajouter</button>
         </form>
         <ul id="liste-courses" class="liste verre"></ul>
+        <div id="total-courses" class="total-courses" hidden></div>
+        <p class="aide aide-groupe">Touche un article pour noter son prix, le chercher sur Carrefour ou Intermarché, ou le mettre en habituel ★.</p>
+        <button type="button" id="courses-budget" class="btn-principal btn-vert bouton-large" hidden>Courses finies → ajouter au Budget</button>
         <button type="button" id="retirer-achetes" class="btn-texte vider-corbeille" hidden>Retirer ce qui est acheté</button>
       </div>
 
@@ -608,6 +630,12 @@
         <strong>Noter un repas</strong>
         <button type="submit" class="btn-texte fort">OK</button>
       </div>
+      <div class="segment segment-plein" id="moment-repas-feuille">
+        <button type="button" data-moment="petitdej">☕ Petit-déj</button>
+        <button type="button" data-moment="dejeuner">🍽 Déj</button>
+        <button type="button" data-moment="gouter">🍪 Goûter</button>
+        <button type="button" data-moment="diner">🌙 Dîner</button>
+      </div>
       <label class="montant">
         <input name="kcal" inputmode="numeric" placeholder="0" autocomplete="off" required>
         <span>kcal</span>
@@ -616,6 +644,96 @@
         <input name="nom" placeholder="Quoi ? (ex. : sandwich)" autocomplete="off" class="champ-titre">
       </div>
       <p class="aide aide-groupe">Tu ne sais pas combien ? Les paquets l'indiquent (« pour une portion »), sinon une estimation suffit.</p>
+    </form>
+  </dialog>
+
+  <!-- Feuille : ma recette -->
+  <dialog id="fenetre-ma-recette" class="feuille">
+    <form id="form-ma-recette" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong id="titre-ma-recette">Ma recette</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div class="groupe">
+        <div class="ligne-nom-recette">
+          <input name="emoji" maxlength="4" placeholder="🍽" autocomplete="off" class="champ-emoji" aria-label="Emoji">
+          <input name="nom" placeholder="Nom (ex. : poulet sauce au poivre)" autocomplete="off" class="champ-titre">
+        </div>
+      </div>
+      <div class="groupe">
+        <label class="ligne">
+          <span class="ico" style="background:#007aff"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg></span>
+          <span class="libelle">Temps (min)</span>
+          <input name="minutes" inputmode="numeric" placeholder="30" autocomplete="off">
+        </label>
+        <label class="ligne">
+          <span class="ico" style="background:#ff9500"><svg viewBox="0 0 24 24"><path d="M12 3c3 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-7 1 2 2 3 3 3 0-3-1-5 0-7z"/></svg></span>
+          <span class="libelle">kcal la portion</span>
+          <input name="kcal" inputmode="numeric" placeholder="facultatif" autocomplete="off">
+        </label>
+      </div>
+      <div>
+        <h3 class="titre-groupe">Quand ?</h3>
+        <div id="moments-ma-recette" class="puces-frigo"></div>
+      </div>
+      <details class="faites details-ingr">
+        <summary id="resume-ingr">Ingrédients</summary>
+        <div id="ingr-ma-recette" class="verre bloc zone-frigo"></div>
+      </details>
+      <div class="groupe">
+        <input name="autres" placeholder="Autres ingrédients (ex. : poivre concassé, cognac)" autocomplete="off" class="champ-titre">
+      </div>
+      <div class="groupe">
+        <textarea name="etapes" rows="5" placeholder="Les étapes, une par ligne" style="padding-top:12px"></textarea>
+      </div>
+      <button type="button" id="suppr-ma-recette" class="groupe btn-supprimer">Supprimer la recette</button>
+    </form>
+  </dialog>
+
+  <!-- Feuille : un article de courses -->
+  <dialog id="fenetre-article" class="feuille">
+    <form id="form-article" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong id="titre-article">Article</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div>
+        <h3 class="titre-groupe">Prix (tu les notes, l'appli les retient)</h3>
+        <div class="groupe">
+          <label class="ligne">
+            <span class="ico" style="background:#0055a4"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1.5 10h-9z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span>
+            <span class="libelle">Carrefour (€)</span>
+            <input name="carrefour" inputmode="decimal" placeholder="—" autocomplete="off">
+          </label>
+          <label class="ligne">
+            <span class="ico" style="background:#e2001a"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1.5 10h-9z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span>
+            <span class="libelle">Intermarché (€)</span>
+            <input name="intermarche" inputmode="decimal" placeholder="—" autocomplete="off">
+          </label>
+        </div>
+      </div>
+      <div class="groupe">
+        <a class="ligne ligne-bouton" id="lien-carrefour" target="_blank" rel="noopener">
+          <span class="ico" style="background:#0055a4"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span>
+          <span class="libelle">Chercher sur Carrefour</span>
+        </a>
+        <a class="ligne ligne-bouton" id="lien-intermarche" target="_blank" rel="noopener">
+          <span class="ico" style="background:#e2001a"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg></span>
+          <span class="libelle">Chercher sur Intermarché</span>
+        </a>
+      </div>
+      <div class="groupe">
+        <label class="ligne">
+          <span class="ico" style="background:#ff9500"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg></span>
+          <span class="libelle">Article habituel</span>
+          <input name="habituel" type="checkbox" class="interrupteur interrupteur-orange">
+        </label>
+      </div>
+      <button type="button" id="suppr-article" class="groupe btn-supprimer">Retirer de la liste</button>
     </form>
   </dialog>
 

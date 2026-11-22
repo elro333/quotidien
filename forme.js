@@ -52,7 +52,10 @@ const formeVide = () => ({
   //   frigo:   ["oeufs", "pates", …]      ← ce que tu as à la maison
   //   courses: [ { id, nom, ingredient, fait } ]
   //   repas:   { "2026-11-22": [ { id, nom, kcal } ] }
-  cuisine: { frigo: [], courses: [], repas: {} },
+  //   favoris: [ids] · mesRecettes: [ { id: "ma-…", nom, emoji, minutes, kcal, moments, ingredients, autres, etapes } ]
+  //   habituels: [ { nom, ingredient } ] · prix: { "lait": { carrefour: 105, intermarche: 99 } } (centimes)
+  //   magasin: "carrefour" | "intermarche"
+  cuisine: { frigo: [], courses: [], repas: {}, favoris: [], mesRecettes: [], habituels: [], prix: {}, magasin: "carrefour" },
 });
 let forme = chargerForme();
 
@@ -81,6 +84,11 @@ function normaliserForme(f) {
       frigo: f?.cuisine?.frigo || [],
       courses: f?.cuisine?.courses || [],
       repas: f?.cuisine?.repas || {},
+      favoris: f?.cuisine?.favoris || [],
+      mesRecettes: f?.cuisine?.mesRecettes || [],
+      habituels: f?.cuisine?.habituels || [],
+      prix: f?.cuisine?.prix || {},
+      magasin: f?.cuisine?.magasin || "carrefour",
     },
   };
 }

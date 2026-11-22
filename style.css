@@ -773,3 +773,27 @@ li.en-glisse .plaque, li.part .plaque { background: #fff; }
 .etape-rempl { color: var(--orange); font-weight: 600; }
 .boutons-recette { display: flex; flex-direction: column; gap: 10px; }
 #forme-alim .jour-mvt { text-transform: none; }
+
+/* Alimentation : moments, favoris, courses */
+.segment-petit button { font-size: 12.5px; }
+#moment-repas { margin-bottom: 8px; }
+#moment-repas button, #moment-repas-feuille button { font-size: 13px; }
+#forme-alim .titre-avec-bouton { align-items: center; }
+#forme-alim .titre-avec-bouton .jour-mvt { margin: 18px 6px 8px; }
+#recettes-favoris .liste { margin-bottom: 4px; }
+.btn-coeur { border: none; background: none; font-size: 30px; line-height: 1; color: #ff2d55; cursor: pointer; padding: 4px; margin-left: auto; flex: none; }
+.texte-tete { min-width: 0; }
+#choix-magasin { margin-bottom: 6px; }
+#bloc-habituels[hidden], #total-courses[hidden], #courses-budget[hidden] { display: none; }
+#bloc-habituels .puces-frigo { margin-bottom: 12px; }
+.total-courses { margin: 10px 6px 0; font-size: 15px; color: var(--texte-2); display: flex; flex-direction: column; gap: 2px; }
+.total-courses .fort { color: var(--texte); font-weight: 700; }
+.bouton-large { width: 100%; margin-top: 12px; }
+.ligne-nom-recette { display: flex; align-items: center; }
+.champ-emoji { width: 52px !important; flex: none; text-align: center; font-size: 24px !important; padding: 10px 0 10px 12px !important; }
+.ligne-nom-recette .champ-titre { flex: 1; min-width: 0; }
+#moments-ma-recette { margin: 0 4px; }
+.details-ingr summary { margin-top: 0; }
+a.ligne-bouton { text-decoration: none; }
+#form-ma-recette .libelle, #form-article .libelle { flex: 1; white-space: nowrap; }
+#form-ma-recette .ligne input, #form-article .ligne input:not(.interrupteur) { width: 90px; flex: none; }
