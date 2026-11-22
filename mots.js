@@ -17,7 +17,7 @@ const MOTS_IT = [
   ["no", "non"],
   ["come stai ?", "comment vas-tu ?"],
   ["sto bene", "je vais bien"],
-  ["mi chiamo…", "je m'appelle…", "Mi chiamo Elsa."],
+  ["mi chiamo…", "je m'appelle…", "Mi chiamo Giulia."],
   ["piacere", "enchanté(e)"],
   ["io sono", "je suis", "Io sono francese."],
   ["tu sei", "tu es"],

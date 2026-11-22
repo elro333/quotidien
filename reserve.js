@@ -26,7 +26,7 @@ function reserve() {
 // Une tâche compte comme mission payée ?
 const estMission = (t) => t.cat === "reserve" && t.mission !== false;
 
-// ---------- Les règles d'une mission (Elsa, 2026-11-22) ----------
+// ---------- Les règles d'une mission (2026-11-22) ----------
 // - Panier repas si la mission couvre TOUTE la tranche 11h-13h ou 19h-21h.
 //   8h-17h ✓ · 16h-23h ✓ · 18h-1h ✓ · 6h-12h ✗ · 22h-7h ✗
 // - Une mission qui passe minuit est payée 2 jours (22h-7h, 18h-1h).
