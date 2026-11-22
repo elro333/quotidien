@@ -877,3 +877,35 @@ a.ligne-bouton { text-decoration: none; }
 
 .aide-mission { font-size: 14px; color: var(--texte-2); min-height: 40px; padding-left: 58px !important; }
 .aide-mission[hidden] { display: none; }
+
+/* ============================================================
+   Recherche, Ma semaine, Calendrier, Épargne
+   ============================================================ */
+.recherche {
+  display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 10px 0 12px; margin: 0 0 14px;
+  border-radius: 12px; background: rgba(120,120,128,.14); color: var(--texte-2);
+}
+.recherche svg { width: 18px; height: 18px; flex: none; stroke-width: 2.2; }
+.recherche input { flex: 1; min-width: 0; border: none; background: none; font: inherit; font-size: 17px; color: var(--texte); outline: none; -webkit-appearance: none; appearance: none; }
+.recherche input::-webkit-search-cancel-button { display: none; }
+.recherche button { border: none; background: rgba(120,120,128,.3); color: #fff; width: 20px; height: 20px; border-radius: 50%; font-size: 14px; line-height: 1; padding: 0; cursor: pointer; }
+#vue-aujourdhui.en-recherche > *:not(.recherche):not(#resultats-recherche) { display: none !important; }
+#resultats-recherche[hidden] { display: none; }
+.titre-resultats { text-transform: none !important; }
+.emoji-resultat { width: 34px; text-align: center; font-size: 22px; flex: none; font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif; }
+
+.btn-bilan { margin-top: 12px; box-shadow: none; font-weight: 500; }
+.btn-bilan.en-avant { box-shadow: inset 0 0 0 1.5px rgba(0,122,255,.5); font-weight: 600; }
+.contenu-bilan { display: flex; flex-direction: column; gap: 10px; }
+.bloc-bilan { padding: 12px 16px; }
+.titre-bilan { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 17px; }
+.ligne-bilan { margin: 3px 0; font-size: 15px; color: var(--texte-2); line-height: 1.35; }
+
+.btn-calendrier { border: none; color: var(--accent); font: inherit; font-size: 17px; padding: 14px; width: 100%; cursor: pointer; }
+
+.carte-objectif .petit { margin-top: 2px; }
+.boutons-objectif { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.boutons-objectif .btn-principal { flex: 1; }
+.btn-bleu-canard { background: #30b0c7; box-shadow: 0 6px 18px rgba(48,176,199,.3), inset 0 1px 0 rgba(255,255,255,.35); }
+.ligne-cat-bouton { width: 100%; border: none; background: none; font: inherit; color: var(--texte); text-align: left; cursor: pointer; }
+.ajout-plafond { font-size: 15px; padding: 8px 0 10px; }

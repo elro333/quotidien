@@ -70,6 +70,13 @@
 
     <!-- ===== AUJOURD'HUI : le récap de chaque onglet (bouton en haut) ===== -->
     <section id="vue-aujourdhui" class="vue active">
+      <!-- Chercher partout (recherche.js) -->
+      <div class="recherche">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+        <input id="champ-recherche" type="search" placeholder="Rechercher" autocomplete="off" enterkeyhint="search">
+        <button type="button" id="effacer-recherche" aria-label="Effacer">×</button>
+      </div>
+      <div id="resultats-recherche" hidden></div>
       <!-- La phrase du jour (accueil.js) -->
       <p id="phrase-du-jour" class="phrase-du-jour"></p>
       <!-- Le soir : rappel des 3 positifs (positifs.js) -->
@@ -91,6 +98,8 @@
       <!-- La pilule du jour et l'humeur (cycle.js) -->
       <div id="mini-pilule" class="verre bloc carte-pilule" hidden></div>
       <div id="humeur-jour" class="verre bloc zone-humeur"></div>
+      <!-- Le bilan de la semaine (semaine.js) -->
+      <button id="btn-bilan" class="verre rappel-positifs btn-bilan"></button>
     </section>
 
     <!-- ===== Onglet 2 : AGENDA, vue « Liste » ===== -->
@@ -145,6 +154,12 @@
 
       <h2>Dépenses par catégorie</h2>
       <div id="repartition" class="verre bloc"></div>
+
+      <div class="titre-avec-bouton">
+        <h2>Objectifs d'épargne</h2>
+        <button id="btn-nouvel-objectif" class="btn-texte">Ajouter</button>
+      </div>
+      <div id="objectifs-epargne"></div>
 
       <div class="titre-avec-bouton">
         <h2>Factures mensuelles</h2>
@@ -455,6 +470,7 @@
         <div class="ligne aide-mission" id="aide-mission" hidden></div>
       </div>
 
+      <button type="button" id="btn-calendrier" class="groupe btn-calendrier">📅 Ajouter au Calendrier (avec alarme)</button>
       <button type="button" id="btn-supprimer" class="groupe btn-supprimer">Supprimer la tâche</button>
     </form>
   </dialog>
@@ -969,6 +985,55 @@
     </form>
   </dialog>
 
+  <!-- Feuille : ma semaine -->
+  <dialog id="fenetre-bilan" class="feuille">
+    <form method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Fermer</button>
+        <strong>Ma semaine</strong>
+        <span></span>
+      </div>
+      <div class="nav-semaine nav-mois">
+        <button type="button" id="bilan-prec" class="btn-icone" aria-label="Semaine précédente"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <strong id="titre-bilan"></strong>
+        <button type="button" id="bilan-suiv" class="btn-icone" aria-label="Semaine suivante"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <div id="contenu-bilan" class="contenu-bilan"></div>
+    </form>
+  </dialog>
+
+  <!-- Feuille : un objectif d'épargne -->
+  <dialog id="fenetre-objectif" class="feuille">
+    <form id="form-objectif" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong id="titre-objectif">Nouvel objectif</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <div class="groupe">
+        <div class="ligne-nom-recette">
+          <input name="emoji" maxlength="4" placeholder="🐷" autocomplete="off" class="champ-emoji" aria-label="Emoji">
+          <input name="nom" placeholder="Pour quoi ? (ex. : voyage, coussin de sécurité)" autocomplete="off" class="champ-titre">
+        </div>
+      </div>
+      <label class="montant">
+        <input name="cible" inputmode="decimal" placeholder="0" autocomplete="off" required>
+        <span>€</span>
+      </label>
+      <div class="groupe">
+        <label class="ligne">
+          <span class="ico" style="background:#ff3b30"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16"/></svg></span>
+          <span class="libelle">D'ici (facultatif)</span>
+          <input name="echeance" type="month">
+        </label>
+      </div>
+      <p class="aide aide-groupe">Avec une date, l'appli calcule combien mettre de côté chaque mois.</p>
+      <button type="button" id="suppr-objectif" class="groupe btn-supprimer">Supprimer l'objectif</button>
+    </form>
+  </dialog>
+
   <!-- Feuille : réglages et sauvegarde -->
   <dialog id="fenetre-reglages" class="feuille">
     <form method="dialog">
@@ -1013,6 +1078,7 @@
   <!-- Un fichier par onglet : plus facile à lire et à modifier -->
   <script src="budget.js"></script>
   <script src="reserve.js"></script>
+  <script src="epargne.js"></script>
   <script src="forme.js"></script>
   <script src="cycle.js"></script>
   <script src="recettes.js"></script>
@@ -1021,6 +1087,9 @@
   <script src="positifs.js"></script>
   <script src="accueil.js"></script>
   <script src="dire.js"></script>
+  <script src="calendrier.js"></script>
+  <script src="semaine.js"></script>
+  <script src="recherche.js"></script>
   <script src="sauvegarde.js"></script>
 </body>
 </html>

@@ -21,6 +21,7 @@ const CAT_DEPENSES = {
   cadeaux:      { nom: "Cadeaux",        emoji: "🎁", couleur: "#ffcc00" },
   logement:     { nom: "Logement",       emoji: "🏠", couleur: "#a2845e" },
   remboursement:{ nom: "Remboursement",  emoji: "↩️", couleur: "#5e5ce6" },
+  epargne:      { nom: "Épargne",        emoji: "🐷", couleur: "#30b0c7" },
   autre:        { nom: "Autre",          emoji: "•••", couleur: "#8e8e93" },
 };
 const CAT_REVENUS = {
@@ -44,7 +45,8 @@ let budget = chargerBudget();
 function chargerBudget() {
   try {
     const b = JSON.parse(localStorage.getItem(CLE_BUDGET));
-    return { mouvements: b?.mouvements || [], dettes: b?.dettes || [], reserve: b?.reserve };
+    // On garde tout (réserve, objectifs d'épargne, plafonds…), et on complète ce qui manque
+    return { ...(b || {}), mouvements: b?.mouvements || [], dettes: b?.dettes || [] };
   } catch (e) {
     return { mouvements: [], dettes: [] };
   }

@@ -79,7 +79,7 @@ function restaurer(fichier) {
     if (!confirm(`Restaurer la sauvegarde du ${date} ?\n${nbT} tâche(s), ${nbM} mouvement(s) d'argent, ${donnees.forme?.seances?.length || 0} séance(s) de sport.\n\nCe qu'il y a dans l'appli maintenant sera remplacé.`)) return;
 
     taches = donnees.taches;
-    budget = { mouvements: donnees.budget.mouvements || [], dettes: donnees.budget.dettes || [], reserve: donnees.budget.reserve };
+    budget = { ...donnees.budget, mouvements: donnees.budget.mouvements || [], dettes: donnees.budget.dettes || [] };
     forme = normaliserForme(donnees.forme); // une ancienne sauvegarde n'a pas de « forme » : on part de zéro
     enregistrer();
     enregistrerBudget();
