@@ -675,7 +675,11 @@ function ouvrirFenetre(tache = null) {
 // Le bouton + ajoute une tâche… un mouvement d'argent sur Budget… une séance sur Forme
 document.getElementById("btn-ajouter").addEventListener("click", () => {
   if (vueActive === "budget") ouvrirMouvement();
-  else if (vueActive === "forme") sousForme === "cycle" ? ouvrirJourCycle(aujourdhui()) : ouvrirForme("seance");
+  else if (vueActive === "forme") {
+    if (sousForme === "cycle") ouvrirJourCycle(aujourdhui());
+    else if (sousForme === "alim") ouvrirRepas();
+    else ouvrirForme("seance");
+  }
   else ouvrirFenetre();
 });
 document.getElementById("btn-annuler").addEventListener("click", () => fenetre.close());

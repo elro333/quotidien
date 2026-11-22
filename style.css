@@ -728,3 +728,48 @@ li.en-glisse .plaque, li.part .plaque { background: #fff; }
 .vider-corbeille { color: var(--rouge); margin: 8px 4px 0; font-size: 15px; }
 #corbeille[hidden] { display: none; }
 #liste-corbeille li .btn-texte { flex: none; }
+
+/* ============================================================
+   Forme › Alimentation
+   ============================================================ */
+#forme-alim[hidden] { display: none; }
+#segment-forme button { font-size: 13px; }
+.etiquette-alim { color: var(--vert) !important; }
+#carte-repas .barre { margin: 6px 0 8px; }
+#carte-repas .petit { margin: 0; }
+.puces-repas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.puce-repas { border: none; font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 99px; background: rgba(52,199,89,.15); color: var(--texte); cursor: pointer; }
+#temps-dispo { margin-bottom: 4px; }
+#recettes-ok .liste, #recettes-presque .liste { margin-top: 6px; }
+#recettes-presque .liste { margin-top: 10px; }
+.zone-frigo { margin-top: 10px; padding: 4px 14px 14px; }
+.zone-frigo .jour-mvt { margin: 14px 2px 8px; }
+.puces-frigo { display: flex; flex-wrap: wrap; gap: 6px; }
+.puce-frigo {
+  border: none; font: inherit; font-size: 14px; padding: 7px 12px; border-radius: 99px; cursor: pointer;
+  background: rgba(120,120,128,.14); color: var(--texte); transition: background .2s, color .2s;
+}
+.puce-frigo.on { background: var(--vert); color: #fff; font-weight: 600; }
+.ajout-course { display: flex; align-items: center; gap: 8px; border-radius: 16px; padding: 4px 6px 4px 16px; margin-bottom: 10px; }
+.ajout-course input { flex: 1; border: none; background: none; font: inherit; font-size: 17px; color: var(--texte); outline: none; padding: 10px 0; min-width: 0; }
+#retirer-achetes[hidden] { display: none; }
+
+/* La feuille recette */
+.contenu-recette { display: flex; flex-direction: column; gap: 14px; }
+.tete-recette { display: flex; align-items: center; gap: 14px; }
+.emoji-recette { font-size: 46px; line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif; }
+.titre-recette { margin: 0; font-size: 22px; }
+.tete-recette .petit { margin: 2px 0 0; }
+.astuce-rapide { margin: -4px 4px 0; font-size: 14px; color: var(--orange); }
+.ligne-ingr { width: 100%; border: none; background: none; font: inherit; color: var(--texte); text-align: left; cursor: pointer; padding-left: 16px; }
+.ligne-ingr + .ligne-ingr::before { left: 16px; }
+.ingr-bonus { color: var(--texte-2); }
+.statut { font-size: 14px; font-weight: 600; white-space: nowrap; }
+.statut.ok { color: var(--vert); font-size: 18px; }
+.statut.remplace { color: var(--orange); }
+.statut.manque { color: var(--rouge); }
+.statut.bonus { color: var(--texte-2); font-weight: 400; }
+.etapes { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.4; }
+.etape-rempl { color: var(--orange); font-weight: 600; }
+.boutons-recette { display: flex; flex-direction: column; gap: 10px; }
+#forme-alim .jour-mvt { text-transform: none; }

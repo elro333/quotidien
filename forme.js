@@ -48,6 +48,11 @@ const formeVide = () => ({
     jours: {},
     pilule: { active: false, nom: "", type: "21-7", debut: null, heure: "21:00", historique: [] },
   },
+  // L'alimentation (gérée par alimentation.js) :
+  //   frigo:   ["oeufs", "pates", …]      ← ce que tu as à la maison
+  //   courses: [ { id, nom, ingredient, fait } ]
+  //   repas:   { "2026-11-22": [ { id, nom, kcal } ] }
+  cuisine: { frigo: [], courses: [], repas: {} },
 });
 let forme = chargerForme();
 
@@ -71,6 +76,11 @@ function normaliserForme(f) {
     cycle: {
       jours: f?.cycle?.jours || {},
       pilule: { ...vide.cycle.pilule, ...(f?.cycle?.pilule || {}) },
+    },
+    cuisine: {
+      frigo: f?.cuisine?.frigo || [],
+      courses: f?.cuisine?.courses || [],
+      repas: f?.cuisine?.repas || {},
     },
   };
 }

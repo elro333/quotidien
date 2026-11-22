@@ -114,6 +114,7 @@ function changerSousForme(s) {
   document.querySelectorAll("#segment-forme button").forEach((b) => b.classList.toggle("active", b.dataset.sous === s));
   document.getElementById("forme-activite").hidden = s !== "activite";
   document.getElementById("forme-cycle").hidden = s !== "cycle";
+  document.getElementById("forme-alim").hidden = s !== "alim";
   window.scrollTo(0, 0);
   afficher();
 }

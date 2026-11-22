@@ -155,6 +155,39 @@
       <div class="segment" id="segment-forme">
         <button data-sous="activite" class="active">Activité</button>
         <button data-sous="cycle">Cycle</button>
+        <button data-sous="alim">Alimentation</button>
+      </div>
+
+      <!-- Partie « Alimentation » : repas, recettes, frigo, courses (alimentation.js) -->
+      <div id="forme-alim" hidden>
+        <div id="carte-repas" class="verre focus"></div>
+
+        <h2>Recettes</h2>
+        <div class="segment segment-plein" id="temps-dispo">
+          <button data-min="0" class="active">Tout</button>
+          <button data-min="15">15 min</button>
+          <button data-min="30">30 min</button>
+          <button data-min="45">45 min</button>
+        </div>
+        <h3 class="jour-mvt">Avec ce que tu as</h3>
+        <div id="recettes-ok"></div>
+        <details class="faites">
+          <summary id="titre-presque">Avec quelques courses</summary>
+          <div id="recettes-presque"></div>
+        </details>
+
+        <details class="faites" id="details-frigo">
+          <summary id="resume-frigo">Mon frigo et placard</summary>
+          <div id="zone-frigo" class="verre bloc zone-frigo"></div>
+        </details>
+
+        <h2>Courses</h2>
+        <form id="form-course" class="ajout-course verre">
+          <input id="champ-course" placeholder="Ajouter (ex. : lait)" autocomplete="off" enterkeyhint="done">
+          <button class="btn-texte fort">Ajouter</button>
+        </form>
+        <ul id="liste-courses" class="liste verre"></ul>
+        <button type="button" id="retirer-achetes" class="btn-texte vider-corbeille" hidden>Retirer ce qui est acheté</button>
       </div>
 
       <!-- Partie « Cycle » : règles, pilule, humeur (dessinée par cycle.js) -->
@@ -553,6 +586,39 @@
   <!-- Petit message « Ajouté ✓ » -->
   <div id="toast" class="toast verre-fort" role="status"></div>
 
+  <!-- Feuille : une recette (remplie par alimentation.js) -->
+  <dialog id="fenetre-recette" class="feuille">
+    <form method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Fermer</button>
+        <strong>Recette</strong>
+        <span></span>
+      </div>
+      <div id="contenu-recette" class="contenu-recette"></div>
+    </form>
+  </dialog>
+
+  <!-- Feuille : noter un repas -->
+  <dialog id="fenetre-repas" class="feuille">
+    <form id="form-repas" method="dialog">
+      <div class="poignee" aria-hidden="true"></div>
+      <div class="entete-feuille">
+        <button type="button" class="btn-texte" data-fermer>Annuler</button>
+        <strong>Noter un repas</strong>
+        <button type="submit" class="btn-texte fort">OK</button>
+      </div>
+      <label class="montant">
+        <input name="kcal" inputmode="numeric" placeholder="0" autocomplete="off" required>
+        <span>kcal</span>
+      </label>
+      <div class="groupe">
+        <input name="nom" placeholder="Quoi ? (ex. : sandwich)" autocomplete="off" class="champ-titre">
+      </div>
+      <p class="aide aide-groupe">Tu ne sais pas combien ? Les paquets l'indiquent (« pour une portion »), sinon une estimation suffit.</p>
+    </form>
+  </dialog>
+
   <!-- Feuille : réglages et sauvegarde -->
   <dialog id="fenetre-reglages" class="feuille">
     <form method="dialog">
@@ -598,6 +664,8 @@
   <script src="budget.js"></script>
   <script src="forme.js"></script>
   <script src="cycle.js"></script>
+  <script src="recettes.js"></script>
+  <script src="alimentation.js"></script>
   <script src="accueil.js"></script>
   <script src="dire.js"></script>
   <script src="sauvegarde.js"></script>
