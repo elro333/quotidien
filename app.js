@@ -655,10 +655,27 @@ function dessinerJours() {
 formulaire.repete.addEventListener("change", dessinerJours);
 
 // La ligne « Mission payée » n'apparaît que pour la catégorie Réserve
+// (avec les horaires : fin de mission, panier, et le résumé « payée 2 jours · panier ✓ »)
 function majLigneMission() {
-  document.getElementById("ligne-mission").hidden = formulaire.cat.value !== "reserve";
+  const reserveOn = formulaire.cat.value === "reserve";
+  const mission = reserveOn && formulaire.mission.checked;
+  document.getElementById("ligne-mission").hidden = !reserveOn;
+  document.getElementById("ligne-fin").hidden = !mission;
+  document.getElementById("ligne-panier").hidden = !mission;
+  const aide = document.getElementById("aide-mission");
+  aide.hidden = !mission;
+  if (mission && typeof calculMission === "function") {
+    const c = calculMission({ heure: formulaire.heure.value, heureFin: formulaire.heureFin.value, panier: formulaire.panier.value });
+    aide.textContent = c.inconnu
+      ? "Mets l'heure de début (Heure) et de fin : l'appli saura si tu as le panier."
+      : `Payée ${c.jours} jour${c.jours > 1 ? "s" : ""} · panier repas ${c.panier ? "✓" : "✗"}` +
+        (formulaire.panier.value ? " (forcé)" : "");
+  }
 }
-formulaire.cat.addEventListener("change", majLigneMission);
+for (const champ of ["cat", "mission", "heure", "heureFin", "panier"]) {
+  formulaire[champ].addEventListener("change", majLigneMission);
+  formulaire[champ].addEventListener("input", majLigneMission);
+}
 
 function ouvrirFenetre(tache = null) {
   enEdition = tache;
@@ -674,6 +691,8 @@ function ouvrirFenetre(tache = null) {
   formulaire.important.checked = !!tache?.important;
   // Réserve : une tâche compte comme mission payée, sauf si on décoche
   formulaire.mission.checked = tache ? tache.mission !== false : true;
+  formulaire.heureFin.value = tache?.heureFin || "";
+  formulaire.panier.value = tache?.panier || "";
   majLigneMission();
   joursChoisis = tache?.jours ? [...tache.jours] : [];
   dessinerJours();
@@ -705,6 +724,8 @@ formulaire.addEventListener("submit", () => {
     jours: formulaire.repete.value === "jours" ? [...joursChoisis] : [],
     important: formulaire.important.checked,
     mission: formulaire.cat.value === "reserve" ? formulaire.mission.checked : undefined,
+    heureFin: formulaire.cat.value === "reserve" ? formulaire.heureFin.value : "",
+    panier: formulaire.cat.value === "reserve" ? formulaire.panier.value : "",
   };
   if (!valeurs.titre) return;
   if (valeurs.repete) {

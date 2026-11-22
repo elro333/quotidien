@@ -26,25 +26,59 @@ function reserve() {
 // Une tâche compte comme mission payée ?
 const estMission = (t) => t.cat === "reserve" && t.mission !== false;
 
-// Les jours de mission d'un mois (un jour = une mission)
-function missionsDuMois(mois) {
-  const [a, m] = mois.split("-").map(Number);
-  const jours = [];
-  for (let n = 1; n <= new Date(a, m, 0).getDate(); n++) {
-    const d = `${mois}-${String(n).padStart(2, "0")}`;
-    if (taches.some((t) => estMission(t) && (t.date === d || tombeLe(t, d)))) jours.push(d);
+// ---------- Les règles d'une mission (Elsa, 2026-11-22) ----------
+// - Panier repas si la mission couvre TOUTE la tranche 11h-13h ou 19h-21h.
+//   8h-17h ✓ · 16h-23h ✓ · 18h-1h ✓ · 6h-12h ✗ · 22h-7h ✗
+// - Une mission qui passe minuit est payée 2 jours (22h-7h, 18h-1h).
+// - Le panier peut être forcé : t.panier = "oui" | "non" (sinon automatique).
+const enMinutes = (h) => {
+  if (!h) return null;
+  const [a, b] = h.split(":").map(Number);
+  return a * 60 + b;
+};
+function calculMission(t) {
+  const debut = enMinutes(t.heure), fin = enMinutes(t.heureFin);
+  const force = t.panier === "oui" ? true : t.panier === "non" ? false : null;
+  if (debut === null || fin === null) {
+    return { jours: 1, panier: !!force, inconnu: force === null };
   }
-  return jours;
+  let f = fin;
+  if (f <= debut) f += 1440; // fin le lendemain
+  // La tranche [a, b] est-elle entièrement dans la mission (ce jour-là ou le lendemain) ?
+  const couvre = (a, b) => [0, 1440].some((dec) => debut <= a + dec && f >= b + dec);
+  const auto = couvre(11 * 60, 13 * 60) || couvre(19 * 60, 21 * 60);
+  return { jours: f > 1440 ? 2 : 1, panier: force ?? auto, auto, inconnu: false };
+}
+
+// Le bilan d'un mois : jours payés, paniers, missions sans horaires
+function bilanMois(mois) {
+  const [a, m] = mois.split("-").map(Number);
+  const veille = ajouterJours(`${mois}-01`, -1); // une mission du dernier soir du mois d'avant peut déborder
+  const payes = new Set();
+  let paniers = 0, sansHoraires = 0;
+  for (let i = 0; i <= new Date(a, m, 0).getDate(); i++) {
+    const d = ajouterJours(veille, i);
+    const t = taches.find((x) => estMission(x) && (x.date === d || tombeLe(x, d)));
+    if (!t) continue;
+    const c = calculMission(t);
+    if (moisDe(d) === mois) {
+      payes.add(d);
+      if (c.panier) paniers++;
+      if (c.inconnu) sansHoraires++;
+    }
+    if (c.jours === 2 && moisDe(ajouterJours(d, 1)) === mois) payes.add(ajouterJours(d, 1));
+  }
+  return { jours: payes.size, paniers, sansHoraires };
 }
 
 // Ce qui doit tomber le jour de paie du mois « mois » (missions du mois d'avant)
 function paieAttendue(mois) {
   const r = reserve();
-  const missions = missionsDuMois(decalerMois(mois, -1)).length;
-  const missionsPaniers = r.panierDecale ? missionsDuMois(decalerMois(mois, -2)).length : missions;
-  const solde = missions * (r.tarif + r.km);
-  const paniers = missionsPaniers * r.panier;
-  return { missions, missionsPaniers, solde, paniers, total: solde + paniers };
+  const b = bilanMois(decalerMois(mois, -1));
+  const bp = r.panierDecale ? bilanMois(decalerMois(mois, -2)) : b;
+  const solde = b.jours * (r.tarif + r.km);
+  const paniers = bp.paniers * r.panier;
+  return { missions: b.jours, missionsPaniers: bp.paniers, sansHoraires: b.sansHoraires, solde, paniers, total: solde + paniers };
 }
 
 const moisLong = (mois) => MOIS_LONGS[Number(mois.slice(5, 7)) - 1];
@@ -68,7 +102,7 @@ function dessinerReserve() {
   carte.append(el("p", "petit", `Paie vers le ${jourPaie} · missions de ${moisLong(decalerMois(moisAffiche, -1))}`));
   const lignes = el("div", "lignes-reserve");
   const ligne = (g, d, fort) => { const l = el("div", "ligne-reserve" + (fort ? " fort" : "")); l.append(el("span", "", g), el("span", "", d)); lignes.append(l); };
-  ligne(`${p.missions} mission${p.missions > 1 ? "s" : ""} × ${euros(r.tarif + r.km)}`, euros(p.solde));
+  ligne(`${p.missions} jour${p.missions > 1 ? "s" : ""} payé${p.missions > 1 ? "s" : ""} × ${euros(r.tarif + r.km)}`, euros(p.solde));
   ligne(`${p.missionsPaniers} panier${p.missionsPaniers > 1 ? "s" : ""} × ${euros(r.panier)}` + (r.panierDecale ? " (décalés)" : ""), euros(p.paniers));
   ligne("Attendu", euros(p.total), true);
   if (recu) {
@@ -80,16 +114,19 @@ function dessinerReserve() {
   } else {
     carte.append(lignes);
   }
+  if (p.sansHoraires) carte.append(el("p", "petit alerte-pilule",
+    `${p.sansHoraires} mission${p.sansHoraires > 1 ? "s" : ""} sans horaires : panier non compté. Ajoute début et fin dans l'Agenda.`));
   const b = el("button", recu ? "btn-secondaire" : "btn-principal btn-vert", recu ? "Modifier ce que j'ai reçu" : "Je l'ai reçue");
   b.addEventListener("click", noterPaieRecue);
   carte.append(b);
 
   // Et les missions de ce mois, payées le mois prochain
-  const ceMois = missionsDuMois(moisAffiche).length;
-  if (ceMois) {
+  const ceMois = bilanMois(moisAffiche);
+  if (ceMois.jours) {
     const suivant = decalerMois(moisAffiche, 1);
+    const montant = ceMois.jours * (r.tarif + r.km) + (r.panierDecale ? 0 : ceMois.paniers * r.panier);
     carte.append(el("p", "petit prochaine-paie",
-      `Ce mois-ci : ${ceMois} mission${ceMois > 1 ? "s" : ""} → ≈ ${euros(ceMois * (r.tarif + r.km + (r.panierDecale ? 0 : r.panier)))} vers le ${r.jourPaie} ${moisLong(suivant)}`));
+      `Ce mois-ci : ${ceMois.jours} jour${ceMois.jours > 1 ? "s" : ""}, ${ceMois.paniers} panier${ceMois.paniers > 1 ? "s" : ""} → ≈ ${euros(montant)} vers le ${r.jourPaie} ${moisLong(suivant)}`));
   }
 }
 

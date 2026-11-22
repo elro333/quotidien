@@ -874,3 +874,6 @@ a.ligne-bouton { text-decoration: none; }
 .prochaine-paie { margin-top: 8px !important; }
 #form-reserve .libelle { flex: 1; white-space: nowrap; }
 #form-reserve .ligne input:not(.interrupteur) { width: 80px; flex: none; }
+
+.aide-mission { font-size: 14px; color: var(--texte-2); min-height: 40px; padding-left: 58px !important; }
+.aide-mission[hidden] { display: none; }

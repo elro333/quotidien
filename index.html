@@ -442,6 +442,17 @@
           <span class="libelle">Mission payée</span>
           <input name="mission" type="checkbox" class="interrupteur">
         </label>
+        <label class="ligne" id="ligne-fin" hidden>
+          <span class="ico" style="background:#5856d6"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l-3 2"/></svg></span>
+          <span class="libelle">Fin de mission</span>
+          <input name="heureFin" type="time">
+        </label>
+        <label class="ligne" id="ligne-panier" hidden>
+          <span class="ico" style="background:#ff9500"><svg viewBox="0 0 24 24"><path d="M5 11h14M6 11a6 6 0 0 0 12 0M12 5v3"/></svg></span>
+          <span class="libelle">Panier repas</span>
+          <select name="panier"><option value="">Automatique</option><option value="oui">Oui</option><option value="non">Non</option></select>
+        </label>
+        <div class="ligne aide-mission" id="aide-mission" hidden></div>
       </div>
 
       <button type="button" id="btn-supprimer" class="groupe btn-supprimer">Supprimer la tâche</button>
